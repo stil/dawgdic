@@ -126,7 +126,7 @@ if (dic.Find("banana") < 0)
 
 == References ==
 
-Related papers are listed below:
+=== Related Papers ===
 
  # Aoe, J.: *An Efficient Digital Search Algorithm by Using a Double-Array Structure*.
   * _IEEE Transactions on Software Engineering_ *15*(9) (September 1989) 1066-1077
@@ -142,3 +142,12 @@ Related papers are listed below:
   * _Information Processing and Management_ *43*(1) (January 2007) 237-247
  # Yata, S., Morita, K., Fuketa, M., Aoe, J.: *Fast String Matching with Space-efficient Word Graphs*.
   * _Innovations in Information Technology (Innovations '08)_ Al Ain, United Arab Emirates (December 2008) 79-83
+
+=== Related Web Pages ===
+
+ # Jan Daciuk: *Jan Daciuk, Dept of Knowledge Engineering, Gdansk University of Technology*
+  * http://www.eti.pg.gda.pl/katedry/kiw/pracownicy/Jan.Daciuk/personal/
+ # Sam Allen: *C# Directed Acyclic Word Graph*
+  * http://dotnetperls.com/Content/Directed-Acyclic-Word-Graph.aspx
+ # Wutka Consulting, Inc.: *Directed Acyclic Word Graphs*
+  * http://www.wutka.com/dawg.html
