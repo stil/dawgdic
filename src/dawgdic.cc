@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "nanika/dawgdic/dictionary.h"
-#include "nanika/dawgdic/explorer.h"
+#include "nanika/dawgdic/dictionary-explorer.h"
 
 // Loads a dictionary file.
 bool LoadDictionary(const char *dic_file_name,
@@ -35,7 +35,7 @@ bool LoadDictionary(const char *dic_file_name,
 bool FindKeys(const nanika::dawgdic::Dictionary &dic, std::istream *input)
 {
 	std::vector<std::size_t> lengths;
-	nanika::dawgdic::Explorer explorer(dic);
+	nanika::dawgdic::DictionaryExplorer explorer(dic);
 
 	std::string line;
 	while (std::getline(*input, line))
