@@ -40,7 +40,7 @@ Outline of commands and headers are given as follows:
   * *make-dawg*
    * Builds a dictionary from a lexicon.
    * Keys must be divided by line separaters(LF).
-   * Keys must be sorted in dictionary order or reverse dictionary order.
+   * Keys must be sorted in dictionary order.
   * *dawgdic*
    * Finds keys in prefixes of each input line.
  * Headers
@@ -104,7 +104,7 @@ dic.Write(&dic_file);
 
 The following sample code gives the way of simple dictionary lookups.
 If you need to find keys in prefixes of an input string,
-please use a class *nanika::dawgdic::Explorer* in addition to
+please use a class *nanika::dawgdic::!DictionaryExplorer* in addition to
 *nanika::dawgdic::Dictionary*.
 
 {{{

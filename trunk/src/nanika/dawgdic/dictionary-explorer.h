@@ -6,15 +6,18 @@
 namespace nanika {
 namespace dawgdic {
 
-class Explorer
+// Class for exploring a dawg dictionary.
+class DictionaryExplorer
 {
 public:
-	Explorer(const Dictionary &dic) : units_(dic.units()), index_(0) {}
+	DictionaryExplorer(const Dictionary &dic)
+		: units_(dic.units()), index_(0) {}
 
-	// Initializes the position.
+	// Initializes matching position.
 	void Reset() { index_ = 0; }
+	void Reset(const Dictionary &dic) { units_ = dic.units(); Reset(); }
 
-	// Traverses a transition.
+	// Follows a transition.
 	bool Follow(CharType label)
 	{
 		BaseType next_index = index_ ^ units_[index_].offset()
@@ -25,7 +28,7 @@ public:
 		return true;
 	}
 
-	// Traverses transitions.
+	// Follows transitions.
 	bool Follow(const CharType *key)
 	{
 		while (*key != '\0' && Follow(*key))
@@ -39,7 +42,7 @@ public:
 		return *key == '\0';
 	}
 
-	// Traverses transitions.
+	// Follows transitions.
 	bool Follow(const CharType *key, SizeType length)
 	{
 		for (SizeType i = 0; i < length; ++i)
@@ -59,9 +62,9 @@ public:
 		return true;
 	}
 
-	// Checks if the current state works as the end of a key.
+	// Checks if a current state is related to the end of a key.
 	bool has_value() const { return units_[index_].has_leaf(); }
-	// Gets a value from the corresponding leaf.
+	// Gets a value from a corresponding leaf.
 	ValueType value() const
 	{ return units_[index_ ^ units_[index_].offset()].value(); }
 
