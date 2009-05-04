@@ -1,0 +1,64 @@
+#summary An example to lookup keys in a dictionary.
+
+= How to Lookup =
+
+== Exact Matching ==
+
+The following example gives a function to lookup a key in a dictionary.
+
+{{{
+#include <nanika/dawgdic/dictionary.h>
+
+// Lookups a key in a dictionary.
+void Lookup(const nanika::dawgdic::Dictionary &dic, const char *key) {
+
+  // Checks whether a dictionary contains a given key or not.
+  if (dic.Contains(key))
+    std::cout << key << ": " << ": found" << std::endl;
+  else
+    std::cout << key << ": " << ": not found" << std::endl;
+
+  // Checks whether a dictionary contains a given key or not.
+  // Also, reads a record if available.
+  int record;
+  if (dic.Find(key, &record))
+    std::cout << key << ": " << ": found (" << record << ')' << std::endl;
+  else
+    std::cout << key << ": " << ": not found" << std::endl;
+}
+}}}
+
+== Prefix Matching ==
+
+The following example gives a function to find
+all occurrences of keys in text.
+
+{{{
+#include <string>
+
+#include <nanika/dawgdic/dictionary.h>
+#include <nanika/dawgdic/dictionary-explorer.h>
+
+// Finds all the keys in a given text.
+void Filter(const nanika::dawgdic::Dictionary &dic, const char *text) {
+
+  nanika::dawgdic::DictionaryExplorer explorer(dic);
+  for (const char *p = text; *p != '\0'; ++p) {
+
+    // Begins prefix matching at each position in a text.
+    explorer.Reset();
+    for (const char *q = p; *q != '\0'; ++q) {
+
+      // Follows a transition one by one.
+      if (!explorer.Follow(*q))
+        break;
+
+      // Outputs information of a matched key.
+      if (explorer.has_value())
+        std::cout << '(' << (p - text) << ", " << (q + 1 - p) << ", "
+                  << explorer.value() << "): "
+                  << std::string(p, q + 1 - p) << std::endl;
+    }
+  }
+}
+}}}

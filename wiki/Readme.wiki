@@ -16,8 +16,10 @@ so its retrieval speed is as fast as that of *Darts*,
 a library for building and accessing double-array tries.
 
  * Documentation
-  * [Readme]
-  * [Interface]
+  * [Readme]: Please read this document first.
+   * [HowToBuild]: An example to build a dictionary from a sorted lexicon.
+   * [HowToLookup]: An example to lookup keys in a dictionary.
+  * [Interface]: This document provides class interfaces.
   * [Algorithm]
 
 ----

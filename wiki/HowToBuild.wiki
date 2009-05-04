@@ -1,0 +1,56 @@
+#summary An example to build a dictionary from a sorted lexicon.
+
+= How to Build =
+
+The following example gives a function to build a dictionary
+from a sorted lexicon.
+This function first reads keys from an input stream and builds a dawg.
+Then, the dawg is converted to a dictionary.
+Finally, this function writes the dictionary into an output stream.
+
+{{{
+#include <iostream>
+#include <string>
+
+#include <nanika/dawgdic/dawg-builder.h>
+#include <nanika/dawgdic/dictionary-builder.h>
+
+// Builds a dictionary from a sorted lexicon in "lexicon_file_name"
+// and writes the dictionary into "dic_file_name".
+bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
+
+  // Keys must be inserted in lexicographic order.
+  nanika::dawgdic::DawgBuilder dawg_builder;
+  std::string key;
+  while (std::getline(*lexicon_input, key)) {
+
+    // "key" must be zero-terminated and 0 is passed as a record.
+    if (!dawg_builder.Insert(key.c_str()))
+      return false;
+
+    // A record could be given as the 2nd argument.
+    // if (!dawg_builder.Insert(key.c_str(), record))
+    //   return false;
+
+    // A length and a record could be given as the 2nd and 3rd arguments.
+    // if (!dawg_builder.Insert(key.c_str(), length, record))
+    //   return false;
+
+    // Notes:
+    //   a zero-length key is not allowed.
+    //   a record must be 0 or a positive integer.
+  }
+
+  // Finishes dictionary construction and initializes "dawg_builder".
+  nanika::dawgdic::Dawg dawg;
+  dawg_builder.Finish(&dawg);
+
+  // Builds a dictionary from a dawg.
+  nanika::dawgdic::Dictionary dic;
+  if (!nanika::dawgdic::DictionaryBuilder::Build(dawg, &dic))
+    return false;
+
+  // Writes a dictionary into a file.
+  return dic.Write(dic_output);
+}
+}}}
