@@ -15,8 +15,11 @@ class DictionaryBuilder
 public:
 	enum
 	{
+		// Number of units in a block.
 		BLOCK_SIZE = 256,
+		// Number of blocks kept unfixed.
 		NUM_OF_UNFIXED_BLOCKS = 16,
+		// Number of units kept unfixed.
 		UNFIXED_SIZE = BLOCK_SIZE * NUM_OF_UNFIXED_BLOCKS,
 	};
 
@@ -87,7 +90,7 @@ private:
 		units(0).set_offset(1);
 		units(0).set_label('\0');
 
-		if (dawg_.size() > 1 && !BuildDictionary(0, 0))
+		if (dawg_.size() > 1 && !BuildDictionary(dawg_.root(), 0))
 			return false;
 		FixAllBlocks();
 
@@ -108,7 +111,7 @@ private:
 			BaseType offset = offsets_[dawg_child_index] ^ dic_index;
 			if (!(offset & LOWER_MASK) || !(offset & UPPER_MASK))
 			{
-				if (dawg_.has_leaf(dawg_index))
+				if (dawg_.is_leaf(dawg_child_index))
 					units(dic_index).set_has_leaf();
 				if (!units(dic_index).set_offset(offset))
 					return false;
@@ -118,6 +121,8 @@ private:
 
 		// Finds a good offset.
 		BaseType offset = ArrangeChildNodes(dawg_index, dic_index);
+		if (!offset)
+			return false;
 		offsets_[dawg_child_index] = offset;
 
 		// Builds a double-array in depth-first order.
@@ -147,7 +152,7 @@ private:
 		// Finds a good offset.
 		BaseType offset = FindGoodOffset(dic_index);
 		if (!units(dic_index).set_offset(dic_index ^ offset))
-			return false;
+			return 0;
 
 		dawg_child_index = dawg_.child(dawg_index);
 		for (SizeType i = 0; i < labels_.size(); ++i)

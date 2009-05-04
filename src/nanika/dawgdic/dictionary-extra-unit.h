@@ -6,7 +6,7 @@
 namespace nanika {
 namespace dawgdic {
 
-// Extra unit for building dictionaries.
+// Extra unit for building a dictionary.
 class DictionaryExtraUnit
 {
 public:

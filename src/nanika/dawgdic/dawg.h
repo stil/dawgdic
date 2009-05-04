@@ -10,54 +10,104 @@ namespace dawgdic {
 class Dawg
 {
 public:
-	typedef std::pair<BaseType, BaseType> PairType;
-	typedef ObjectPool<PairType> PairPoolType;
+	typedef ObjectPool<BaseType> BasePoolType;
 	typedef ObjectPool<UCharType> LabelPoolType;
 
-	Dawg() : state_pool_(), label_pool_(), size_(0) {}
-	Dawg(PairPoolType *state_pool, LabelPoolType *label_pool, BaseType size)
-		: state_pool_(), label_pool_(), size_(size)
+	Dawg() : state_pool_(), label_pool_(),
+		num_of_states_(0), num_of_merged_states_(0) {}
+	Dawg(BasePoolType *state_pool, LabelPoolType *label_pool,
+		SizeType num_of_states, SizeType num_of_merged_states)
+		: state_pool_(), label_pool_(), num_of_states_(num_of_states),
+		num_of_merged_states_(num_of_merged_states)
 	{
 		state_pool_.Swap(state_pool);
 		label_pool_.Swap(label_pool);
 	}
 
-	BaseType size() const { return size_; }
-	BaseType capacity() const { return state_pool_.size(); }
+	BaseType root() const { return 0; }
+
+	// Number of fixed transitions.
+	SizeType size() const { return state_pool_.size(); }
+	// Number of transitions.
+	SizeType num_of_transitions() const { return state_pool_.size(); }
+	// Number of states.
+	SizeType num_of_states() const { return num_of_states_; }
+	// Number of merged states.
+	SizeType num_of_merged_states() const { return num_of_merged_states_; }
 
 	// Reads values.
-	bool has_leaf(BaseType index) const
-	{ return (state_pool_[index].second & 1) ? true : false; }
 	BaseType child(BaseType index) const
-	{ return state_pool_[index].first; }
+	{ return state_pool_[index] >> 2; }
 	BaseType sibling(BaseType index) const
-	{ return state_pool_[index].second >> 1; }
+	{ return (state_pool_[index] & 1) ? (index + 1) : 0; }
 	ValueType value(BaseType index) const
-	{ return static_cast<ValueType>(state_pool_[index].first); }
+	{ return static_cast<ValueType>(state_pool_[index] >> 1); }
 	bool is_leaf(BaseType index) const
 	{ return label(index) == '\0'; }
 	UCharType label(BaseType index) const
 	{ return label_pool_[index]; }
 
-	// Clears an object.
+	// Clears an object pool.
 	void Clear()
 	{
 		state_pool_.Clear();
 		label_pool_.Clear();
-		size_ = 0;
+		num_of_states_ = 0;
+		num_of_merged_states_ = 0;
 	}
-	// Swaps objects.
+
+	// Swaps object pools.
 	void Swap(Dawg *dawg)
 	{
 		state_pool_.Swap(&dawg->state_pool_);
 		label_pool_.Swap(&dawg->label_pool_);
-		std::swap(size_, dawg->size_);
+		std::swap(num_of_states_, dawg->num_of_states_);
+		std::swap(num_of_merged_states_, dawg->num_of_merged_states_);
+	}
+
+	// Exact matching.
+	bool Contains(const CharType *key) const
+	{
+		BaseType index = root();
+		for ( ; *key != '\0'; ++key)
+		{
+			for (index = child(index); index; index = sibling(index))
+			{
+				if (label(index) == static_cast<UCharType>(*key))
+					break;
+			}
+			if (!index)
+				return false;
+		}
+		return is_leaf(child(index));
+	}
+
+	// Count prefix keys in a string.
+	int CountPrefixKeys(const CharType *key) const
+	{
+		int count = 0;
+		BaseType index = root();
+		for ( ; *key != '\0'; ++key)
+		{
+			index = child(index);
+			if (is_leaf(index))
+				++count;
+			for ( ; index; index = sibling(index))
+			{
+				if (label(index) == static_cast<UCharType>(*key))
+					break;
+			}
+			if (!index)
+				return count;
+		}
+		return count + is_leaf(child(index));
 	}
 
 private:
-	PairPoolType state_pool_;
+	BasePoolType state_pool_;
 	LabelPoolType label_pool_;
-	BaseType size_;
+	SizeType num_of_states_;
+	SizeType num_of_merged_states_;
 };
 
 }  // namespace dawgdic

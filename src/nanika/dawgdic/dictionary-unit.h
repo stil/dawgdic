@@ -6,7 +6,7 @@
 namespace nanika {
 namespace dawgdic {
 
-// Unit type of dictionaries.
+// Unit of a dictionary.
 class DictionaryUnit
 {
 public:

@@ -33,10 +33,13 @@ bool BuildDictionary(const char *key_file_name,
 		}
 	}
 	nanika::dawgdic::Dawg dawg;
-	nanika::dawgdic::SizeType num_of_merged_states;
-	dawg_builder.Finish(&dawg, &num_of_merged_states);
-	std::cout << "no. states: " << dawg.size() << std::endl;
-	std::cout << "no. merged states: " << num_of_merged_states << std::endl;
+	dawg_builder.Finish(&dawg);
+	std::cout << "no. states: "
+		<< dawg.num_of_states() << std::endl;
+	std::cout << "no. transitions: "
+		<< dawg.num_of_transitions() << std::endl;
+	std::cout << "no. merged states: "
+		<< dawg.num_of_merged_states() << std::endl;
 
 	// Builds a dictionary from a dawg.
 	if (!nanika::dawgdic::DictionaryBuilder::Build(dawg, dic))

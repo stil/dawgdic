@@ -9,7 +9,7 @@ namespace nanika {
 namespace dawgdic {
 
 // Object pool.
-template <typename OBJECT_TYPE, BaseType BLOCK_SIZE = 1 << 10>
+template <typename OBJECT_TYPE, SizeType BLOCK_SIZE = 1 << 10>
 class ObjectPool
 {
 public:
@@ -18,16 +18,16 @@ public:
 	ObjectPool() : blocks_(), size_(0) {}
 	~ObjectPool() { Clear(); }
 
-	// The number of objects.
-	BaseType size() const { return size_; }
+	// Number of allocated objects.
+	SizeType size() const { return size_; }
 
 	// Accessors.
-	ObjectType &operator[](BaseType index)
+	ObjectType &operator[](SizeType index)
 	{ return blocks_[index / BLOCK_SIZE][index % BLOCK_SIZE]; }
-	const ObjectType &operator[](BaseType index) const
+	const ObjectType &operator[](SizeType index) const
 	{ return blocks_[index / BLOCK_SIZE][index % BLOCK_SIZE]; }
 
-	// Deletes all blocks.
+	// Deletes all objects and frees memory.
 	void Clear()
 	{
 		for (SizeType i = 0; i < blocks_.size(); ++i)
@@ -36,24 +36,25 @@ public:
 		std::vector<ObjectType *>(0).swap(blocks_);
 		size_ = 0;
 	}
-	// Swaps objects.
+
+	// Swaps object pools.
 	void Swap(ObjectPool *pool)
 	{
 		blocks_.swap(pool->blocks_);
 		std::swap(size_, pool->size_);
 	}
 
-	// Gets the ID of a new object.
-	BaseType Allocate()
+	// Allocates memory for a new object and returns its ID.
+	SizeType Allocate()
 	{
-		if (size_ == static_cast<BaseType>(BLOCK_SIZE * blocks_.size()))
+		if (size_ == BLOCK_SIZE * blocks_.size())
 			blocks_.push_back(new ObjectType[BLOCK_SIZE]);
 		return size_++;
 	}
 
 private:
 	std::vector<ObjectType *> blocks_;
-	BaseType size_;
+	SizeType size_;
 
 	// Disallows copies.
 	ObjectPool(const ObjectPool &);

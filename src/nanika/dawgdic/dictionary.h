@@ -10,6 +10,7 @@
 namespace nanika {
 namespace dawgdic {
 
+// Dictionary class for retrieval and binary I/O.
 class Dictionary
 {
 public:
@@ -18,16 +19,18 @@ public:
 		: units_(0), size_(0), units_buf_() { set_units_buf(units_buf); }
 
 	const DictionaryUnit *units() const { return units_; }
-	BaseType size() const { return size_; }
+	SizeType size() const { return size_; }
 	SizeType total_size() const { return sizeof(DictionaryUnit) * size_; }
 
 	// Reads a dictionary from an input stream.
 	bool Read(std::istream *input)
 	{
-		BaseType size;
-		if (!input->read(reinterpret_cast<char *>(&size), sizeof(BaseType)))
+		BaseType base_size;
+		if (!input->read(reinterpret_cast<char *>(&base_size),
+			sizeof(BaseType)))
 			return false;
 
+		SizeType size = base_size;
 		std::vector<DictionaryUnit> units_buf(size);
 		if (!input->read(reinterpret_cast<char *>(&units_buf[0]),
 			sizeof(DictionaryUnit) * size))
@@ -36,10 +39,12 @@ public:
 		set_units_buf(&units_buf);
 		return true;
 	}
+
 	// Writes a dictionry to an output stream.
 	bool Write(std::ostream *output) const
 	{
-		if (!output->write(reinterpret_cast<const char *>(&size_),
+		BaseType base_size = static_cast<BaseType>(size_);
+		if (!output->write(reinterpret_cast<const char *>(&base_size),
 			sizeof(BaseType)))
 			return false;
 
@@ -51,13 +56,13 @@ public:
 	}
 
 	// Exact matching.
-	bool Contains(const CharType *key)
+	bool Contains(const CharType *key) const
 	{
 		BaseType index = 0;
 		DictionaryUnit unit = units_[index];
 		return Traverse(key, &index, &unit) && unit.has_leaf();
 	}
-	bool Contains(const CharType *key, SizeType length)
+	bool Contains(const CharType *key, SizeType length) const
 	{
 		BaseType index = 0;
 		DictionaryUnit unit = units_[index];
@@ -65,7 +70,7 @@ public:
 	}
 
 	// Exact matching.
-	ValueType Find(const CharType *key)
+	ValueType Find(const CharType *key) const
 	{
 		BaseType index = 0;
 		DictionaryUnit unit = units_[index];
@@ -73,7 +78,7 @@ public:
 			return units_[index ^ unit.offset()].value();
 		return -1;
 	}
-	ValueType Find(const CharType *key, SizeType length)
+	ValueType Find(const CharType *key, SizeType length) const
 	{
 		BaseType index = 0;
 		DictionaryUnit unit = units_[index];
@@ -81,7 +86,7 @@ public:
 			return units_[index ^ unit.offset()].value();
 		return -1;
 	}
-	bool Find(const CharType *key, ValueType *value)
+	bool Find(const CharType *key, ValueType *value) const
 	{
 		BaseType index = 0;
 		DictionaryUnit unit = units_[index];
@@ -90,7 +95,7 @@ public:
 		*value = units_[index ^ unit.offset()].value();
 		return true;
 	}
-	bool Find(const CharType *key, SizeType length, ValueType *value)
+	bool Find(const CharType *key, SizeType length, ValueType *value) const
 	{
 		BaseType index = 0;
 		DictionaryUnit unit = units_[index];
@@ -110,14 +115,14 @@ public:
 	}
 
 	// Maps memory with its size.
-	void Map(const void *address, BaseType size)
+	void Map(const void *address, SizeType size)
 	{
 		Clear();
 		units_ = static_cast<const DictionaryUnit *>(address);
 		size_ = size;
 	}
 
-	// Initializes an object.
+	// Initializes a dictionary.
 	void Clear()
 	{
 		units_ = 0;
@@ -145,7 +150,7 @@ public:
 
 private:
 	const DictionaryUnit *units_;
-	BaseType size_;
+	SizeType size_;
 	std::vector<DictionaryUnit> units_buf_;
 
 	// Disallows copies.
@@ -153,7 +158,8 @@ private:
 	Dictionary &operator=(const Dictionary &);
 
 	// Traverses a dawg.
-	bool Traverse(const CharType *key, BaseType *index, DictionaryUnit *unit)
+	bool Traverse(const CharType *key, BaseType *index,
+		DictionaryUnit *unit) const
 	{
 		for ( ; *key != '\0'; ++key)
 		{
@@ -165,7 +171,7 @@ private:
 		return true;
 	}
 	bool Traverse(const CharType *key, SizeType length,
-		BaseType *index, DictionaryUnit *unit)
+		BaseType *index, DictionaryUnit *unit) const
 	{
 		for (SizeType i = 0; i < length; ++i)
 		{
