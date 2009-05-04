@@ -155,7 +155,7 @@ this function returns -1 as a *value*.
 
 {{{
 // Maps memory with its size.
-void Map(const void *address)
+void Map(const void *address);
 }}}
 
 This function maps a given *address* to a buffer of double-array elements.
@@ -163,7 +163,7 @@ The first 4 bytes are used as the buffer size.
 
 {{{
 // Maps memory with its size.
-void Map(const void *address, SizeType size)
+void Map(const void *address, SizeType size);
 }}}
 
 This function maps a given *address* to a buffer of double-array elements.
