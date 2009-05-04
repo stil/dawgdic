@@ -20,6 +20,8 @@ a library for building and accessing double-array tries.
   * [Interface]
   * [Algorithm]
 
+----
+
 == How To Install ==
 
 === Basic Installation ===
@@ -55,6 +57,8 @@ Outline of commands and headers are given as follows:
 If you want to use *dawgdic* on Windows or without installation.
 Please copy headers in src/nanika/dawgdic to
 include directory or your project directory.
+
+----
 
 == How To Use ==
 
@@ -123,6 +127,8 @@ if (dic.Contains("apple"))
 if (dic.Find("banana") < 0)
   std::cout << "banana: not found" << std::endl;
 }}}
+
+----
 
 == References ==
 
