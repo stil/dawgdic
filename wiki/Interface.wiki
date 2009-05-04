@@ -2,6 +2,18 @@
 
 = Interfaces of DAWG Dictionary Library =
 
+== Main Interfaces ==
+
+The main classes of this library are given as follows:
+
+|| *Header* || *Namespace* || *Class* ||
+|| nanika/dawgdic/dawg.h || nanika::dawgdic || Dawg ||
+|| nanika/dawgdic/dawg-builder.h || nanika::dawgdic || !DawgBuilder ||
+|| nanika/dawgdic/dictionary.h || nanika::dawgdic || Dictionary ||
+|| nanika/dawgdic/dictionary-builder.h || nanika::dawgdic || !DictionaryBuilder ||
+|| nanika/dawgdic/dictionary-explorer.h || nanika::dawgdic || !DictionaryExplorer ||
+|| nanika/ios/line-reader.h || nanika::ios || !LineReader ||
+
 ----
 
 == Dawg ==
@@ -253,5 +265,3 @@ bool Read(const char **line, std::size_t *length = NULL);
 
 This function reads a line and updates *line* and *length*.
 However, *line* may be unavailable after the next call.
-
-----
