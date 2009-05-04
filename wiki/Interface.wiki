@@ -1,0 +1,257 @@
+#summary This document provides class interfaces.
+
+= Interfaces of DAWG Dictionary Library =
+
+----
+
+== Dawg ==
+
+|| *Header* || nanika/dawgdic/dawg.h ||
+|| *Namespace* || nanika::dawgdic ||
+
+{{{
+// Number of transitions.
+SizeType size() const;
+SizeType num_of_transitions() const;
+}}}
+
+These functions return the number of transitions in a dawg.
+
+{{{
+// Number of states.
+SizeType num_of_states() const;
+}}}
+
+This function returns the number of states in a dawg.
+
+{{{
+// Number of merged states.
+SizeType num_of_merged_states() const;
+}}}
+
+This function returns the number of states merged in building a dawg.
+
+----
+
+== !DawgBuilder ==
+
+|| *Header* || nanika/dawgdic/dawg-builder.h ||
+|| *Namespace* || nanika::dawgdic ||
+
+{{{
+// Number of transitions.
+SizeType size() const;
+SizeType num_of_transitions() const;
+}}}
+
+These functions return the number of transitions in a building dawg.
+
+{{{
+// Number of states.
+SizeType num_of_states() const;
+}}}
+
+This function returns the number of states in a building dawg.
+
+{{{
+// Number of merged states.
+SizeType num_of_merged_states() const;
+}}}
+
+This function returns the number of states merged in building a dawg.
+
+{{{
+// Inserts a key into a dawg.
+bool Insert(const CharType *key, ValueType value = 0);
+bool Insert(const CharType *key, SizeType length, ValueType value);
+}}}
+
+This function inserts a *key* into a dawg.
+A zero-*length* *key* is not allowed to be inserted.
+Also, keys must be inserted in lexicographic order and
+a *value* must be 0 or a positive integer.
+
+{{{
+// Finishes building a dawg.
+bool Finish(Dawg *dawg);
+}}}
+
+This function finishes building a dawg and updates *dawg*.
+Then, *this* object will be initialized.
+
+----
+
+== Dictionary ==
+
+|| *Header* || nanika/dawgdic/dictionary.h ||
+|| *Namespace* || nanika::dawgdic ||
+
+{{{
+const DictionaryUnit *units() const;
+}}}
+
+This function returns a pointer to a buffer for double-array elements.
+
+{{{
+SizeType size() const;
+}}}
+
+This function returns the number of double-array elements.
+
+{{{
+SizeType total_size() const;
+}}}
+
+This function returns the number of bytes allocated to double-array elements.
+
+{{{
+// Reads a dictionary from an input stream.
+bool Read(std::istream *input);
+}}}
+
+This function reads a double-array from an *input* stream and
+restores a double-array.
+
+{{{
+// Writes a dictionry into an output stream.
+bool Write(std::ostream *output) const;
+}}}
+
+This function writes a double-array into an *output* stream.
+
+{{{
+// Exact matching.
+bool Contains(const CharType *key) const;
+bool Contains(const CharType *key, SizeType length) const;
+}}}
+
+This function performs a dictionary lookup and
+returns whether a *key* exists in a dictionary or not.
+
+{{{
+// Exact matching.
+ValueType Find(const CharType *key) const;
+ValueType Find(const CharType *key, SizeType length) const;
+bool Find(const CharType *key, ValueType *value) const;
+bool Find(const CharType *key, SizeType length, ValueType *value) const;
+}}}
+
+This function performs a dictionary lookup and
+returns a *value* of a *key*.
+If a *key* does not exist in a dictionary,
+this function returns -1 as a *value*.
+
+{{{
+// Maps memory with its size.
+void Map(const void *address)
+}}}
+
+This function maps a given *address* to a buffer of double-array elements.
+The first 4 bytes are used as the buffer size.
+
+{{{
+// Maps memory with its size.
+void Map(const void *address, SizeType size)
+}}}
+
+This function maps a given *address* to a buffer of double-array elements.
+
+----
+
+== !DictionaryBuilder ==
+
+|| *Header* || nanika/dawgdic/dictionary-builder.h ||
+|| *Namespace* || nanika::dawgdic ||
+
+{{{
+// Builds a dictionary from a dawg.
+static bool Build(const Dawg &dawg, Dictionary *dic, BaseType *num_of_unused_units = NULL);
+}}}
+
+This function builds a dictionary from a *dawg*,
+and then updates *dic* and *num_of_unused_units*.
+After that, *this* object will be initialized.
+
+----
+
+== !DictionaryExplorer ==
+
+|| *Header* || nanika/dawgdic/dictionary-explorer.h ||
+|| *Namespace* || nanika::dawgdic ||
+
+{{{
+DictionaryExplorer(const Dictionary &dic);
+}}}
+
+This function initializes an object to traverse a dictionary.
+
+{{{
+// Initializes matching position.
+void Reset();
+void Reset(const Dictionary &dic);
+}}}
+
+This function moves a matching position to the root state.
+
+{{{
+// Follows a transition.
+bool Follow(CharType label);
+}}}
+
+This function follows a transition with a given *label*.
+
+{{{
+// Follows transitions.
+bool Follow(const CharType *key);
+bool Follow(const CharType *key, SizeType *key_count);
+bool Follow(const CharType *key, SizeType length);
+bool Follow(const CharType *key, SizeType length, SizeType *key_count);
+}}}
+
+This function follows transitions with labels in a given *key* and
+returns the number of transitions successfully followed to *key_count*.
+
+{{{
+bool has_value() const;
+}}}
+
+This function returns whether a current state has
+an out-transition to a terminal or not.
+
+{{{
+ValueType value() const;
+}}}
+
+This function returns a value in a corresponding terminal.
+
+----
+
+== !LineReader ==
+
+|| *Header* || nanika/ios/line-reader.h ||
+|| *Namespace* || nanika::ios ||
+
+{{{
+// Creates an object to read lines from a given input stream.
+explicit LineReader(std::istream *stream, std::size_t block_size = DEFAULT_BLOCK_SIZE);
+}}}
+
+This function initializes an object to read lines
+from a given input *stream* by using an internal buffer.
+
+{{{
+// Reads a line.
+bool Read(std::string *line);
+}}}
+
+This function reads a *line* and creates a string object.
+
+{{{
+// Reads a line (this buffer will be broken by the next call).
+bool Read(const char **line, std::size_t *length = NULL);
+}}}
+
+This function reads a line and updates *line* and *length*.
+However, *line* may be unavailable after the next call.
+
+----
