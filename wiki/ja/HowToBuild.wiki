@@ -1,11 +1,11 @@
-#summary ����ς݂̌�b���玫�����\�z������@�D
+#summary 整列済みの語彙から辞書を構築する方法．
 
-= �\�z���@ =
+= 構築方法 =
 
-�ȉ��̗�́C����ς݂̌�b���玫�����\�z���邽�߂̊֐��ł���C
-���̓X�g���[������ǂݏo�����L�[������� DAWG �ɒǉ����C
-���ׂẴL�[��ǉ�������� DAWG ���玫���ւƕϊ�����D
-�����āC�������o�̓X�g���[���ւƏ����o���D
+以下の例は，整列済みの語彙から辞書を構築するための関数であり，
+入力ストリームから読み出したキーを一つずつ DAWG に追加し，
+すべてのキーを追加した後で DAWG から辞書へと変換する．
+そして，辞書を出力ストリームへと書き出す．
 
 {{{
 #include <iostream>
@@ -14,43 +14,43 @@
 #include <nanika/dawgdic/dawg-builder.h>
 #include <nanika/dawgdic/dictionary-builder.h>
 
-// ����ς݂̌�b����̓X�g���[�� "lexicon_input" ����ǂݏo���C
-// �������\�z���� "dic_output" �ւƏ����o���D
+// 整列済みの語彙を入力ストリーム "lexicon_input" から読み出し，
+// 辞書を構築して "dic_output" へと書き出す．
 bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
 
-  // ��b�͎����������ɐ��񂳂�Ă���K�v������D
+  // 語彙は辞書式昇順に整列されている必要がある．
   nanika::dawgdic::DawgBuilder dawg_builder;
   std::string key;
   while (std::getline(*lexicon_input, key)) {
 
-    // �e�L�[�� NULL �������I�[�Ƃ��C���R�[�h�Ƃ��� 0 ���֘A�Â�����D
+    // 各キーは NULL 文字を終端とし，レコードとして 0 が関連づけられる．
     // "key" must be zero-terminated and 0 is passed as a record.
     if (!dawg_builder.Insert(key.c_str()))
       return false;
 
-    // �� 2 �����Ƀ��R�[�h���w��ł���D
+    // 第 2 引数にレコードを指定できる．
     // if (!dawg_builder.Insert(key.c_str(), record))
     //   return false;
 
-    // �L�[�̒����ƃ��R�[�h��� 2 �����C�� 3 �����Ƃ��Ďw��ł���D
+    // キーの長さとレコードを第 2 引数，第 3 引数として指定できる．
     // if (!dawg_builder.Insert(key.c_str(), length, record))
     //   return false;
 
-    // ���ӁF
-    //   ���� 0 �̃L�[�͒ǉ��ł��Ȃ��D
-    //   ���R�[�h�� 0 �ȏ�̐����łȂ���΂Ȃ�Ȃ��D
+    // 注意：
+    //   長さ 0 のキーは追加できない．
+    //   レコードは 0 以上の整数でなければならない．
   }
 
-  // DAWG �̍\�z���I�����C�\�z�p�̃I�u�W�F�N�g������������D
+  // DAWG の構築を終了し，構築用のオブジェクトを初期化する．
   nanika::dawgdic::Dawg dawg;
   dawg_builder.Finish(&dawg);
 
-  // DAWG ���玫�����\�z����D
+  // DAWG から辞書を構築する．
   nanika::dawgdic::Dictionary dic;
   if (!nanika::dawgdic::DictionaryBuilder::Build(dawg, &dic))
     return false;
 
-  // �������o�̓X�g���[���ɏ����o���D
+  // 辞書を出力ストリームに書き出す．
   return dic.Write(dic_output);
 }
 }}}

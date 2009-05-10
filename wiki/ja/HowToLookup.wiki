@@ -1,25 +1,25 @@
-#summary «‘‚ğ—p‚¢‚ÄŒŸõ‚·‚é—áD
+#summary è¾æ›¸ã‚’ç”¨ã„ã¦æ¤œç´¢ã™ã‚‹ä¾‹ï¼
 
-= ŒŸõ•û–@ =
+= æ¤œç´¢æ–¹æ³• =
 
-== Š®‘Sˆê’vŒŸõ ==
+== å®Œå…¨ä¸€è‡´æ¤œç´¢ ==
 
-ˆÈ‰º‚Ì—á‚ÍC«‘‚©‚çƒL[‚ğŒŸõ‚·‚éŠÖ”‚Å‚ ‚éD
+ä»¥ä¸‹ã®ä¾‹ã¯ï¼Œè¾æ›¸ã‹ã‚‰ã‚­ãƒ¼ã‚’æ¤œç´¢ã™ã‚‹é–¢æ•°ã§ã‚ã‚‹ï¼
 
 {{{
 #include <nanika/dawgdic/dictionary.h>
 
-// «‘ˆø‚«‚ğ‚¨‚±‚È‚¤D
+// è¾æ›¸å¼•ãã‚’ãŠã“ãªã†ï¼
 void Lookup(const nanika::dawgdic::Dictionary &dic, const char *key) {
 
-  // ƒL[‚ª«‘‚É“o˜^‚³‚ê‚Ä‚¢‚é‚©‚Ç‚¤‚©‚ğŠm”F‚·‚éD
+  // ã‚­ãƒ¼ãŒè¾æ›¸ã«ç™»éŒ²ã•ã‚Œã¦ã„ã‚‹ã‹ã©ã†ã‹ã‚’ç¢ºèªã™ã‚‹ï¼
   if (dic.Contains(key))
     std::cout << key << ": " << ": found" << std::endl;
   else
     std::cout << key << ": " << ": not found" << std::endl;
 
-  // ƒL[‚ª«‘‚É“o˜^‚³‚ê‚Ä‚¢‚é‚©‚Ç‚¤‚©‚ğŠm”F‚µC
-  // “o˜^‚³‚ê‚Ä‚¢‚éê‡‚ÍƒŒƒR[ƒh‚ğæ‚èo‚·D
+  // ã‚­ãƒ¼ãŒè¾æ›¸ã«ç™»éŒ²ã•ã‚Œã¦ã„ã‚‹ã‹ã©ã†ã‹ã‚’ç¢ºèªã—ï¼Œ
+  // ç™»éŒ²ã•ã‚Œã¦ã„ã‚‹å ´åˆã¯ãƒ¬ã‚³ãƒ¼ãƒ‰ã‚’å–ã‚Šå‡ºã™ï¼
   int record;
   if (dic.Find(key, &record))
     std::cout << key << ": " << ": found (" << record << ')' << std::endl;
@@ -28,9 +28,9 @@ void Lookup(const nanika::dawgdic::Dictionary &dic, const char *key) {
 }
 }}}
 
-== ‘O•ûˆê’vŒŸõ ==
+== å‰æ–¹ä¸€è‡´æ¤œç´¢ ==
 
-ˆÈ‰º‚Ì—á‚ÍC•¶š—ñ‚ÉŠÜ‚Ü‚ê‚éƒL[‚ğ‚·‚×‚Ä—ñ‹“‚·‚éŠÖ”‚Å‚ ‚éD
+ä»¥ä¸‹ã®ä¾‹ã¯ï¼Œæ–‡å­—åˆ—ã«å«ã¾ã‚Œã‚‹ã‚­ãƒ¼ã‚’ã™ã¹ã¦åˆ—æŒ™ã™ã‚‹é–¢æ•°ã§ã‚ã‚‹ï¼
 
 {{{
 #include <string>
@@ -38,21 +38,21 @@ void Lookup(const nanika::dawgdic::Dictionary &dic, const char *key) {
 #include <nanika/dawgdic/dictionary.h>
 #include <nanika/dawgdic/dictionary-explorer.h>
 
-// •¶š—ñ "text" ‚ÉoŒ»‚·‚é‚·‚×‚Ä‚ÌƒL[‚ğŒ©‚Â‚¯‚éD
+// æ–‡å­—åˆ— "text" ã«å‡ºç¾ã™ã‚‹ã™ã¹ã¦ã®ã‚­ãƒ¼ã‚’è¦‹ã¤ã‘ã‚‹ï¼
 void Filter(const nanika::dawgdic::Dictionary &dic, const char *text) {
 
   nanika::dawgdic::DictionaryExplorer explorer(dic);
   for (const char *p = text; *p != '\0'; ++p) {
 
-    // n“_‚ğ•ÏX‚µ‚Â‚ÂC‘O•ûˆê’vŒŸõ‚ğ‚¨‚±‚È‚¤D
+    // å§‹ç‚¹ã‚’å¤‰æ›´ã—ã¤ã¤ï¼Œå‰æ–¹ä¸€è‡´æ¤œç´¢ã‚’ãŠã“ãªã†ï¼
     explorer.Reset();
     for (const char *q = p; *q != '\0'; ++q) {
 
-      // ‘JˆÚ‚ğˆê‚Â‚¸‚Â’H‚éD
+      // é·ç§»ã‚’ä¸€ã¤ãšã¤è¾¿ã‚‹ï¼
       if (!explorer.Follow(*q))
         break;
 
-      // ŒŸo‚µ‚½ƒL[‚Ìî•ñ‚ğo—Í‚·‚éD
+      // æ¤œå‡ºã—ãŸã‚­ãƒ¼ã®æƒ…å ±ã‚’å‡ºåŠ›ã™ã‚‹ï¼
       if (explorer.has_value())
         std::cout << '(' << (p - text) << ", " << (q + 1 - p) << ", "
                   << explorer.value() << "): "
