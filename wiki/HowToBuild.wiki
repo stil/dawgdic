@@ -15,8 +15,8 @@ Finally, this function writes the dictionary into an output stream.
 #include <nanika/dawgdic/dawg-builder.h>
 #include <nanika/dawgdic/dictionary-builder.h>
 
-// Builds a dictionary from a sorted lexicon in "lexicon_file_name"
-// and writes the dictionary into "dic_file_name".
+// Builds a dictionary from a sorted lexicon in "lexicon_input"
+// and writes the dictionary into "dic_output".
 bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
 
   // Keys must be inserted in lexicographic order.
@@ -50,7 +50,7 @@ bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
   if (!nanika::dawgdic::DictionaryBuilder::Build(dawg, &dic))
     return false;
 
-  // Writes a dictionary into a file.
+  // Writes a dictionary into an output stream.
   return dic.Write(dic_output);
 }
 }}}
