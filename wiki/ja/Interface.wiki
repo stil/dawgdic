@@ -1,10 +1,10 @@
-#summary �N���X�̃C���^�t�F�[�X�D
+#summary クラスのインタフェース．
 
-= ���C�u�����̃C���^�t�F�[�X =
+= ライブラリのインタフェース =
 
-== ��v�ȃC���^�t�F�[�X ==
+== 主要なインタフェース ==
 
-���C�u���� *dawgdic* �̒񋟂����ȃN���X���ȉ��Ɏ����D
+ライブラリ *dawgdic* の提供する主なクラスを以下に示す．
 
 || *Header* || *Namespace* || *Class* ||
 || nanika/dawgdic/dawg.h || nanika::dawgdic || Dawg ||
@@ -22,26 +22,26 @@
 || *Namespace* || nanika::dawgdic ||
 
 {{{
-// �J�ڐ��D
+// 遷移数．
 SizeType size() const;
 SizeType num_of_transitions() const;
 }}}
 
-DAWG ���\������J�ڂ̐���Ԃ��D
+DAWG を構成する遷移の数を返す．
 
 {{{
-// ��Ԑ��D
+// 状態数．
 SizeType num_of_states() const;
 }}}
 
-DAWG ���\�������Ԃ̐���Ԃ��D
+DAWG を構成する状態の数を返す．
 
 {{{
-// �������ꂽ��Ԃ̐��D
+// 併合された状態の数．
 SizeType num_of_merged_states() const;
 }}}
 
-DAWG �̍\�z�ɂ����ĕ������ꂽ��Ԃ̐���Ԃ��D
+DAWG の構築において併合された状態の数を返す．
 
 ----
 
@@ -51,45 +51,45 @@ DAWG �̍\�z�ɂ����ĕ������ꂽ��Ԃ̐���Ԃ��D
 || *Namespace* || nanika::dawgdic ||
 
 {{{
-// �J�ڐ��D
+// 遷移数．
 SizeType size() const;
 SizeType num_of_transitions() const;
 }}}
 
-�\�z���� DAWG ���\������J�ڂ̐���Ԃ��D
+構築中の DAWG を構成する遷移の数を返す．
 
 {{{
-// ��Ԑ��D
+// 状態数．
 SizeType num_of_states() const;
 }}}
 
-�\�z���� DAWG ���\�������Ԃ̐���Ԃ��D
+構築中の DAWG を構成する状態の数を返す．
 
 {{{
-// �������ꂽ��Ԃ̐��D
+// 併合された状態の数．
 SizeType num_of_merged_states() const;
 }}}
 
-�Ăяo�����܂łɕ������ꂽ��Ԃ̐���Ԃ��D
+呼び出し時までに併合された状態の数を返す．
 
 {{{
-// �L�[�� DAWG �ɒǉ�����D
+// キーを DAWG に追加する．
 bool Insert(const CharType *key, ValueType value = 0);
 bool Insert(const CharType *key, SizeType length, ValueType value);
 }}}
 
-�����̊֐��́C�L�[ *key* �� DAWG �ɒǉ�����D
-���� *length* �� 0 �̃L�[�͒ǉ����邱�Ƃ��ł��Ȃ��D
-�܂��C�L�[�͎������ɒǉ�����K�v������C
-���R�[�h *value* �� 0 �ȏ�̐����łȂ���΂Ȃ�Ȃ��D
+これらの関数は，キー *key* を DAWG に追加する．
+長さ *length* が 0 のキーは追加することができない．
+また，キーは辞書順に追加する必要があり，
+レコード *value* は 0 以上の整数でなければならない．
 
 {{{
-// DAWG �̍\�z���I������D
+// DAWG の構築を終了する．
 bool Finish(Dawg *dawg);
 }}}
 
-DAWG �̍\�z���I�����C�������� DAWG �� *dawg* �ɓn���D
-�Ȃ��C�I�u�W�F�N�g *this* �͏����������D
+DAWG の構築を終了し，完成した DAWG を *dawg* に渡す．
+なお，オブジェクト *this* は初期化される．
 
 ----
 
@@ -102,57 +102,57 @@ DAWG �̍\�z���I�����C�������� DAWG �� *dawg* �ɓn���D
 const DictionaryUnit *units() const;
 }}}
 
-�������\������z��̐擪�v�f�ւ̃|�C���^��Ԃ��D
+辞書を構成する配列の先頭要素へのポインタを返す．
 
 {{{
 SizeType size() const;
 }}}
 
-�������\������z��̗v�f����Ԃ��D
+辞書を構成する配列の要素数を返す．
 
 {{{
 SizeType total_size() const;
 }}}
 
-�����̍\���ɕK�v�ȃ������ʂ� byte �P�ʂŕԂ��D
+辞書の構成に必要なメモリ量を byte 単位で返す．
 
 {{{
-// ��������̓X�g���[������ǂݍ��ށD
+// 辞書を入力ストリームから読み込む．
 bool Read(std::istream *input);
 }}}
 
-���̓X�g���[�� *input* ����f�[�^��ǂݍ��݁C�����𕜌�����D
+入力ストリーム *input* からデータを読み込み，辞書を復元する．
 
 {{{
-// �������o�̓X�g���[���ɏ����o���D
+// 辞書を出力ストリームに書き出す．
 bool Write(std::ostream *output) const;
 }}}
 
-�o�̓X�g���[�� *output* �Ɏ����������o���D
+出力ストリーム *output* に辞書を書き出す．
 
 {{{
-// ���S��v�����D
+// 完全一致検索．
 bool Contains(const CharType *key) const;
 bool Contains(const CharType *key, SizeType length) const;
 }}}
 
-���������������Ȃ��֐��ł���C
-�L�[ *key* �������ɓo�^����Ă��邩�ǂ�����Ԃ��D
+辞書引きをおこなう関数であり，
+キー *key* が辞書に登録されているかどうかを返す．
 
 {{{
-// ���S��v�����D
+// 完全一致検索．
 ValueType Find(const CharType *key) const;
 ValueType Find(const CharType *key, SizeType length) const;
 bool Find(const CharType *key, ValueType *value) const;
 bool Find(const CharType *key, SizeType length, ValueType *value) const;
 }}}
 
-���������������Ȃ��֐��ł���C�L�[ *key* �������ɓo�^����Ă���ꍇ�C
-�֘A�Â����Ă��郌�R�[�h *value* ��Ԃ��D
-�Ȃ��C�L�[�����݂��Ȃ��ꍇ�C���R�[�h�Ƃ��� -1 ���Ԃ����D
+辞書引きをおこなう関数であり，キー *key* が辞書に登録されている場合，
+関連づけられているレコード *value* を返す．
+なお，キーが存在しない場合，レコードとして -1 が返される．
 
 {{{
-// �O����v�����D
+// 前方一致検索．
 BaseType root() const;
 bool has_value(BaseType index) const;
 ValueType value(BaseType index) const;
@@ -163,24 +163,24 @@ bool Follow(const CharType *s, SizeType length, BaseType *index);
 bool Follow(const CharType *s, SizeType length, BaseType *index, SizeType *count);
 }}}
 
-�O����v�����������Ȃ����߂̊֐��ł���C
-*nanika::dawgdic::!DictionaryExplorer* �Ɠ��l�̎g����������D
-�������C�T���ʒu *index* �͊֐� *root()* �ɂ�菉��������K�v������D
+前方一致検索をおこなうための関数であり，
+*nanika::dawgdic::!DictionaryExplorer* と同様の使い方をする．
+ただし，探索位置 *index* は関数 *root()* により初期化する必要がある．
 
 {{{
-// �C�ӂ̗̈��z��Ɋ��蓖�Ă�D
+// 任意の領域を配列に割り当てる．
 void Map(const void *address);
 }}}
 
-�C�ӂ̃A�h���X *address* ����n�܂�̈��z��Ɋ��蓖�Ă�D
-�������C�擪�� 4 bytes �͗v�f���Ƃ��ė��p�����D
+任意のアドレス *address* から始まる領域を配列に割り当てる．
+ただし，先頭の 4 bytes は要素数として利用される．
 
 {{{
-// �C�ӂ̗̈��z��Ɋ��蓖�Ă�D
+// 任意の領域を配列に割り当てる．
 void Map(const void *address, SizeType size);
 }}}
 
-�C�ӂ̃A�h���X *address* ����n�܂�̈��z��Ɋ��蓖�Ă�D
+任意のアドレス *address* から始まる領域を配列に割り当てる．
 
 ----
 
@@ -190,14 +190,14 @@ void Map(const void *address, SizeType size);
 || *Namespace* || nanika::dawgdic ||
 
 {{{
-// DAWG ���玫�����\�z����D
+// DAWG から辞書を構築する．
 static bool Build(const Dawg &dawg, Dictionary *dic, BaseType *num_of_unused_units = NULL);
 }}}
 
-*nanika::dawgdic::!DawgBuilder* �ɂ��\�z���� *dawg* ���玫�����\�z���C
-*dic* ��V���������ɒu��������ƂƂ��ɁC
-���g�p�̗v�f���� *num_of_unused_units* �ɑ������D
-�Ȃ��C�I�u�W�F�N�g *this* �͏����������D
+*nanika::dawgdic::!DawgBuilder* により構築した *dawg* から辞書を構築し，
+*dic* を新しい辞書に置き換えるとともに，
+未使用の要素数を *num_of_unused_units* に代入する．
+なお，オブジェクト *this* は初期化される．
 
 ----
 
@@ -210,20 +210,20 @@ static bool Build(const Dawg &dawg, Dictionary *dic, BaseType *num_of_unused_uni
 DictionaryExplorer(const Dictionary &dic);
 }}}
 
-���� *dic* ��T�����邽�߂̃I�u�W�F�N�g������������D
+辞書 *dic* を探索するためのオブジェクトを初期化する．
 
 {{{
 void Reset();
 void Reset(const Dictionary &dic);
 }}}
 
-�T���ʒu������������D
+探索位置を初期化する．
 
 {{{
 bool Follow(CharType label);
 }}}
 
-�w�肳�ꂽ���x�� *label* �����J�ڂ�H��D
+指定されたラベル *label* を持つ遷移を辿る．
 
 {{{
 bool Follow(const CharType *s);
@@ -232,21 +232,21 @@ bool Follow(const CharType *s, SizeType length);
 bool Follow(const CharType *s, SizeType length, SizeType *count);
 }}}
 
-�w�肳�ꂽ������ *s* ���\�����郉�x�������J�ڂ�H��C
-�J�ڂɐ��������񐔂� *count* �ɑ������D
+指定された文字列 *s* を構成するラベルを持つ遷移を辿り，
+遷移に成功した回数を *count* に代入する．
 
 {{{
 bool has_value() const;
 }}}
 
-�T���ʒu����I�[�ւ̑J�ڂ����݂��邩�ǂ�����Ԃ��D
+探索位置から終端への遷移が存在するかどうかを返す．
 
 {{{
 ValueType value() const;
 }}}
 
-�T���ʒu����I�[�ւ̑J�ڂ����݂���Ƃ��C
-���̏I�[�Ɋi�[����Ă��郌�R�[�h��Ԃ��D
+探索位置から終端への遷移が存在するとき，
+その終端に格納されているレコードを返す．
 
 ----
 
@@ -259,19 +259,19 @@ ValueType value() const;
 explicit LineReader(std::istream *stream, std::size_t block_size = DEFAULT_BLOCK_SIZE);
 }}}
 
-���̓X�g���[�� *stream* ����̍s�ǂݍ��݂�
-�o�b�t�@�����O�ɂ�荂�������邽�߂̃I�u�W�F�N�g������������D
+入力ストリーム *stream* からの行読み込みを
+バッファリングにより高速化するためのオブジェクトを初期化する．
 
 {{{
 bool Read(std::string *line);
 }}}
 
-�s��ǂݍ��݁C*line* �Ɋi�[����D
+行を読み込み，*line* に格納する．
 
 {{{
 // Reads a line (this buffer will be broken by the next call).
 bool Read(const char **line, std::size_t *length = NULL);
 }}}
 
-�s��ǂݍ��݁C�J�n�ʒu�� *line* �Ɋi�[���C������ *length* �Ɋi�[����D
-�������C���̓ǂݍ��݂ƂƂ��ɁC*line* �̓��e�͔j�󂳂��D
+行を読み込み，開始位置を *line* に格納し，長さを *length* に格納する．
+ただし，次の読み込みとともに，*line* の内容は破壊される．
