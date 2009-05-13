@@ -5,23 +5,23 @@
 #include "nanika/dawgdic/dawg-builder.h"
 #include "nanika/dawgdic/dictionary-builder.h"
 
-// Builds a dictionary from a set of keys.
-bool BuildDictionary(const char *key_file_name,
+// Builds a dictionary from a sorted lexicon.
+bool BuildDictionary(const char *lexicon_file_name,
 	nanika::dawgdic::Dictionary *dic)
 {
-	std::cerr << "input: " << key_file_name << std::endl;
+	std::cerr << "input: " << lexicon_file_name << std::endl;
 
 	// Opens an input file.
-	std::ifstream key_file(key_file_name, std::ios::binary);
-	if (!key_file.is_open())
+	std::ifstream lexicon_file(lexicon_file_name, std::ios::binary);
+	if (!lexicon_file.is_open())
 	{
 		std::cerr << "error: failed to open file: "
-			<< key_file_name << std::endl;
+			<< lexicon_file_name << std::endl;
 		return false;
 	}
 
 	// Reads keys and inserts them into a dawg.
-	nanika::ios::LineReader key_reader(&key_file);
+	nanika::ios::LineReader key_reader(&lexicon_file);
 	nanika::dawgdic::DawgBuilder dawg_builder;
 	const char *key;
 	while (key_reader.Read(&key))
@@ -83,15 +83,16 @@ int main(int argc, char *argv[])
 	// Checks arguments.
 	if (argc != 3)
 	{
-		std::cerr << "Usage: " << argv[0] << " KeyFile DicFile" << std::endl;
+		std::cerr << "Usage: " << argv[0]
+			<< " LexiconFile DicFile" << std::endl;
 		return 1;
 	}
 
-	const char *key_file_name = argv[1];
+	const char *lexicon_file_name = argv[1];
 	const char *dic_file_name = argv[2];
 
 	nanika::dawgdic::Dictionary dic;
-	if (!BuildDictionary(key_file_name, &dic))
+	if (!BuildDictionary(lexicon_file_name, &dic))
 		return 1;
 
 	if (!SaveDictionary(dic, dic_file_name))

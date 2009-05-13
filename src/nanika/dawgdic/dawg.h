@@ -65,44 +65,6 @@ public:
 		std::swap(num_of_merged_states_, dawg->num_of_merged_states_);
 	}
 
-	// Exact matching.
-	bool Contains(const CharType *key) const
-	{
-		BaseType index = root();
-		for ( ; *key != '\0'; ++key)
-		{
-			for (index = child(index); index; index = sibling(index))
-			{
-				if (label(index) == static_cast<UCharType>(*key))
-					break;
-			}
-			if (!index)
-				return false;
-		}
-		return is_leaf(child(index));
-	}
-
-	// Count prefix keys in a string.
-	int CountPrefixKeys(const CharType *key) const
-	{
-		int count = 0;
-		BaseType index = root();
-		for ( ; *key != '\0'; ++key)
-		{
-			index = child(index);
-			if (is_leaf(index))
-				++count;
-			for ( ; index; index = sibling(index))
-			{
-				if (label(index) == static_cast<UCharType>(*key))
-					break;
-			}
-			if (!index)
-				return count;
-		}
-		return count + is_leaf(child(index));
-	}
-
 private:
 	BasePoolType state_pool_;
 	LabelPoolType label_pool_;

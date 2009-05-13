@@ -118,7 +118,7 @@ public:
 		return true;
 	}
 
-	// Finishes building a dawg and returns the number of merged states.
+	// Finishes building a dawg.
 	bool Finish(Dawg *dawg)
 	{
 		// Initializes a builder if not initialized.

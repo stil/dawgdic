@@ -105,6 +105,60 @@ public:
 		return true;
 	}
 
+	// Root index.
+	BaseType root() const { return 0; }
+	// Checks if a given index is related to the end of a key.
+	bool has_value(BaseType index) const { return units_[index].has_leaf(); }
+	// Gets a value from a given index.
+	ValueType value(BaseType index) const
+	{ return units_[index ^ units_[index].offset()].value(); }
+
+	// Follows a transition.
+	bool Follow(CharType label, BaseType *index) const
+	{
+		BaseType next_index = *index ^ units_[*index].offset()
+			^ static_cast<UCharType>(label);
+		if (units_[next_index].label() != static_cast<UCharType>(label))
+			return false;
+		*index = next_index;
+		return true;
+	}
+
+	// Follows transitions.
+	bool Follow(const CharType *s, BaseType *index) const
+	{
+		while (*s != '\0' && Follow(*s, index))
+			++s;
+		return *s == '\0';
+	}
+	bool Follow(const CharType *s, BaseType *index, SizeType *count) const
+	{
+		while (*s != '\0' && Follow(*s, index))
+			++s, ++*count;
+		return *s == '\0';
+	}
+
+	// Follows transitions.
+	bool Follow(const CharType *s, SizeType length, BaseType *index) const
+	{
+		for (SizeType i = 0; i < length; ++i)
+		{
+			if (!Follow(s[i], index))
+				return false;
+		}
+		return true;
+	}
+	bool Follow(const CharType *s, SizeType length, BaseType *index,
+		SizeType *count) const
+	{
+		for (SizeType i = 0; i < length; ++i, ++*count)
+		{
+			if (!Follow(s[i], index))
+				return false;
+		}
+		return true;
+	}
+
 	// Maps memory with its size.
 	void Map(const void *address)
 	{
