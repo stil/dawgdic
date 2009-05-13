@@ -13,7 +13,7 @@ public:
 	DictionaryExplorer(const Dictionary &dic)
 		: units_(dic.units()), index_(0) {}
 
-	// Initializes matching position.
+	// Initializes a matching position.
 	void Reset() { index_ = 0; }
 	void Reset(const Dictionary &dic) { units_ = dic.units(); Reset(); }
 
@@ -29,34 +29,34 @@ public:
 	}
 
 	// Follows transitions.
-	bool Follow(const CharType *key)
+	bool Follow(const CharType *s)
 	{
-		while (*key != '\0' && Follow(*key))
-			++key;
-		return *key == '\0';
+		while (*s != '\0' && Follow(*s))
+			++s;
+		return *s == '\0';
 	}
-	bool Follow(const CharType *key, SizeType *key_count)
+	bool Follow(const CharType *s, SizeType *count)
 	{
-		while (*key != '\0' && Follow(*key))
-			++key, ++*key_count;
-		return *key == '\0';
+		while (*s != '\0' && Follow(*s))
+			++s, ++*count;
+		return *s == '\0';
 	}
 
 	// Follows transitions.
-	bool Follow(const CharType *key, SizeType length)
+	bool Follow(const CharType *s, SizeType length)
 	{
 		for (SizeType i = 0; i < length; ++i)
 		{
-			if (!Follow(key[i]))
+			if (!Follow(s[i]))
 				return false;
 		}
 		return true;
 	}
-	bool Follow(const CharType *key, SizeType length, SizeType *key_count)
+	bool Follow(const CharType *s, SizeType length, SizeType *count)
 	{
-		for (SizeType i = 0; i < length; ++i, ++*key_count)
+		for (SizeType i = 0; i < length; ++i, ++*count)
 		{
-			if (!Follow(key[i]))
+			if (!Follow(s[i]))
 				return false;
 		}
 		return true;

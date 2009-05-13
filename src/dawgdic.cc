@@ -12,7 +12,7 @@ bool LoadDictionary(const char *dic_file_name,
 {
 	std::cerr << "output: " << dic_file_name << std::endl;
 
-	// Creates an output file.
+	// Opens an input file.
 	std::ifstream dic_file(dic_file_name, std::ios::binary);
 	if (!dic_file.is_open())
 	{
@@ -31,18 +31,19 @@ bool LoadDictionary(const char *dic_file_name,
 	return true;
 }
 
-// Finds keys.
+// Example of finding prefix keys from each line of an input text.
+// There are two ways to perform prefix matching.
+// One uses nanika::dawgdic::DictionaryExplorer,
+// and the other uses only nanika::dawgdic::Dictionary.
 bool FindKeys(const nanika::dawgdic::Dictionary &dic, std::istream *input)
 {
 	std::vector<std::size_t> lengths;
-	nanika::dawgdic::DictionaryExplorer explorer(dic);
-
 	std::string line;
 	while (std::getline(*input, line))
 	{
-		// Finds keys from prefixes of a line.
-		explorer.Reset();
-		lengths.clear();
+		// The following two examples give the same results.
+#ifdef USE_DICTIONARY_EXPLORER
+		nanika::dawgdic::DictionaryExplorer explorer(dic);
 		for (std::size_t i = 0; i < line.length(); ++i)
 		{
 			if (!explorer.Follow(line[i]))
@@ -52,6 +53,18 @@ bool FindKeys(const nanika::dawgdic::Dictionary &dic, std::istream *input)
 			if (explorer.has_value())
 				lengths.push_back(i + 1);
 		}
+#else  // USE_DICTIONARY_EXPLORER
+		nanika::dawgdic::BaseType index = dic.root();
+		for (std::size_t i = 0; i < line.length(); ++i)
+		{
+			if (!dic.Follow(line[i], &index))
+				break;
+
+			// Reads a value.
+			if (dic.has_value(index))
+				lengths.push_back(i + 1);
+		}
+#endif  // USE_DICTIONARY_EXPLORER
 
 		if (lengths.empty())
 			std::cout << line << ": not found" << std::endl;
@@ -62,6 +75,7 @@ bool FindKeys(const nanika::dawgdic::Dictionary &dic, std::istream *input)
 				std::cout << ' ' << lengths[i];
 			std::cout << std::endl;
 		}
+		lengths.clear();
 	}
 
 	return true;
