@@ -110,8 +110,8 @@ dic.Write(&dic_file);
 
 The following sample code gives the way of simple dictionary lookups.
 If you need to find keys in prefixes of an input string,
-please use a class *nanika::dawgdic::!DictionaryExplorer* in addition to
-*nanika::dawgdic::Dictionary*.
+please use a class *nanika::dawgdic::!DictionaryExplorer* or
+a member function *Follow()* of *nanika::dawgdic::Dictionary*.
 
 {{{
 #include <ifstream>

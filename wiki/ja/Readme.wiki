@@ -1,0 +1,163 @@
+#summary 最初にお読みください．
+#labels Phase-Design,Featured
+
+= DAWG 辞書 C++ ヘッダライブラリ =
+
+== はじめに ==
+
+本プロジェクトは，Directed Acyclic Word Graph (DAWG) による
+辞書検索を実現するライブラリ *dawgdic* を提供します．
+
+DAWG はトライ（Trie）の共通部分木を併合したグラフ構造であり，
+トライを決定性有限オートマトン（DFA）とみなすとき，
+最小決定性有限オートマトン（MDFA）に相当します．
+そのため，メモリ使用量において，トライよりも優れています．
+さらに，*dawgdic* では，DAWG の実装にダブル配列を用いているため，
+ダブル配列によるトライのライブラリ *Darts* と比較しても，
+遜色ない検索速度を実現することができるという特徴があります．
+
+ * Documentation
+  * [Readme]: 最初にお読みください．
+   * [HowToBuild]: 辞書構築の方法に関するドキュメントです．
+   * [HowToLookup]: 辞書検索の方法に関するドキュメントです．
+  * [Interface]: クラスのインタフェースに関するドキュメントです．
+  * [Algorithm]
+
+----
+
+== インストール ==
+
+=== 基本的なインストール方法 ===
+
+Unix 系の環境では，configure と make によるインストールが可能です．
+
+{{{
+./configure
+make
+make install
+}}}
+
+上記の方法により，2 つのコマンド *make-dawgdic* と *dawgdic* に加えて，
+C++ ヘッダライブラリとして *<nanika/ios/`*`.h>* と *<nanika/dawgdic/`*`.h>*
+がインストールされます．
+各コマンドとヘッダの概要は以下の通りです．
+
+ * コマンド
+  * *make-dawg*
+   * 語彙（キー集合）から辞書を構築します．
+   * 入力ファイルの（LF を終端とする）各行がキーとして登録されます．
+   * キーは辞書順に整列しておく必要があります．
+  * *dawgdic*
+   * 入力行の先頭に出現するキーを見つけます．
+ * ヘッダ
+  * *<nanika/ios/`*`.h>*
+   * 行単位の入出力を高速化するためのクラスを提供します．
+  * *<nanika/dawgdic/`*`.h>*
+   * 辞書を構築するためのクラスを提供します．
+   * キーを検索するためのクラスを提供します．
+
+=== インストールせずに使う方法 ===
+
+Windows 環境で configure スクリプトを利用できない場合など，
+インストールをせずに *dawgdic* を使いたいときは，
+src/nanika/dawgdic 以下のヘッダをプロジェクトのディレクトリに
+直接コピーしてください．
+
+----
+
+== 使い方 ==
+
+=== 辞書の構築 ===
+
+辞書の構築手順は以下のようになります．
+
+ # DAWG の構築
+  * キー集合から単純な DAWG を構築します．
+   * キーは辞書順に一つずつ登録します．
+   * *nanika::dawgdic::!DawgBuilder* が DAWG 構築用のクラスです．
+   * *nanika::dawgdic::Dawg* が DAWG のクラスです．
+ # DAWG の変換
+  * 単純な DAWG を辞書へと変換します．
+   * *nanika::dawgdic::!DictionaryBuilder* 辞書構築用のクラスです.
+   * *nanika::dawgdic::Dictionary* は辞書のクラスです．
+
+以下の例では，2 つのキー "apple" と "orange" に対する辞書を構築しています．
+キーの登録時に引数を省略するとデフォルトの値 0 がレコードとして
+割り当てられますが，必要に応じてユーザが設定することも可能です．
+その場合，*nanika::dawgdic::!DawgBuilder* のメンバ関数 *Insert()* に対し，
+第 2 引数もしくは第 3 引数として渡すことになります．
+
+{{{
+#include <ofstream>
+
+#include <nanika/dawgdic/dawg-builder.h>
+#include <nanika/dawgdic/dictionary-builder.h>
+
+nanika::dawgdic::DawgBuilder dawg_builder;
+dawg_builder.Insert("apple");
+dawg_builder.Insert("orange");
+
+nanika::dawgdic::Dawg dawg;
+dawg_builder.Finish(&dawg);
+
+nanika::dawgdic::Dictionary dic;
+nanika::dawgdic::DictionaryBuilder::Build(dawg, &dic);
+
+// 辞書をファイル "test.dic" に書き出す．
+std::ofstream dic_file("test.dic", ios::binary);
+dic.Write(&dic_file);
+}}}
+
+=== 辞書へのアクセス ===
+
+以下の例では，辞書からキーを検索しています．
+前方一致検索をおこなう場合は，
+*nanika::dawgdic::!DictionaryExplorer* を用いるか，
+*nanika::dawgdic::Dictionary* のメンバ関数 *Follow()* を利用してください．
+
+{{{
+#include <ifstream>
+#include <iostream>
+
+#include <nanika/dawgdic/dictionary.h>
+
+// 辞書をファイル "test.dic" から読み込む．
+std::ifstream dic_file("test.dic", ios::binary);
+nanika::dawgdic::Dictionary dic;
+dic.Read(&dic_file);
+
+if (dic.Contains("apple"))
+  std::cout << "apple: found" << std::endl;
+if (dic.Find("banana") < 0)
+  std::cout << "banana: not found" << std::endl;
+}}}
+
+----
+
+== 参考文献 ==
+
+=== 関連論文 ===
+
+ # Aoe, J.: *An Efficient Digital Search Algorithm by Using a Double-Array Structure*.
+  * _IEEE Transactions on Software Engineering_ *15*(9) (September 1989) 1066-1077
+ # Aoe, J., Morimoto, K., Sato, T.: *An Efficient Implementation of Trie Structures*.
+  * _Software: Practice and Experience_, *22*(9) (September 1992) 695-721
+ # Daciuk, J., Watson, B.W., Mihov, S., Watson, R.E.: *Incremental Construction of Minimal Acyclic Finite-State Automata*.
+  * _Computational Linguistics_ *26*(1) (March 2000) 3-16
+ # Morita, K., Fuketa, M., Yamakawa, Y. and Aoe, J.: *Fast insertion methods of a double-array structure*.
+  * _Software: Practice and Experience_ *31*(1) (January 2001) 43-65
+ # Ciura, M.G., Deorowicz, S.: *How to squeeze a lexicon*.
+  * _Software: Practice and Experience_ *31*(11) (September 2001) 1077-1090
+ # Yata, S., Oono, M., Morita, K., Fuketa, M., Sumitomo, T. and Aoe, J.: *A compact static double-array keeping character codes*.
+  * _Information Processing and Management_ *43*(1) (January 2007) 237-247
+ # Yata, S., Morita, K., Fuketa, M., Aoe, J.: *Fast String Matching with Space-efficient Word Graphs*.
+  * _Innovations in Information Technology (Innovations '08)_ Al Ain, United Arab Emirates (December 2008) 79-83
+
+=== 関連 URL ===
+
+ # Jan Daciuk: *Jan Daciuk, Dept of Knowledge Engineering, Gdansk University of Technology*
+  * http://www.eti.pg.gda.pl/katedry/kiw/pracownicy/Jan.Daciuk/personal/
+ # Sam Allen: *C# Directed Acyclic Word Graph*
+  * http://dotnetperls.com/Content/Directed-Acyclic-Word-Graph.aspx
+ # Wutka Consulting, Inc.: *Directed Acyclic Word Graphs*
+  * http://www.wutka.com/dawg.html
