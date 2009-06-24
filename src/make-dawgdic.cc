@@ -1,13 +1,12 @@
 #include <fstream>
 #include <iostream>
 
-#include "nanika/ios/line-reader.h"
-#include "nanika/dawgdic/dawg-builder.h"
-#include "nanika/dawgdic/dictionary-builder.h"
+#include "dawgdic/dawg-builder.h"
+#include "dawgdic/dictionary-builder.h"
 
 // Builds a dictionary from a sorted lexicon.
 bool BuildDictionary(const char *lexicon_file_name,
-	nanika::dawgdic::Dictionary *dic)
+	dawgdic::Dictionary *dic)
 {
 	std::cerr << "input: " << lexicon_file_name << std::endl;
 
@@ -21,18 +20,17 @@ bool BuildDictionary(const char *lexicon_file_name,
 	}
 
 	// Reads keys and inserts them into a dawg.
-	nanika::ios::LineReader key_reader(&lexicon_file);
-	nanika::dawgdic::DawgBuilder dawg_builder;
-	const char *key;
-	while (key_reader.Read(&key))
+	dawgdic::DawgBuilder dawg_builder;
+	std::string key;
+	while (std::getline(lexicon_file, key))
 	{
-		if (!dawg_builder.Insert(key))
+		if (!dawg_builder.Insert(key.c_str()))
 		{
 			std::cerr << "error: failed to insert key: " << key << std::endl;
 			return false;
 		}
 	}
-	nanika::dawgdic::Dawg dawg;
+	dawgdic::Dawg dawg;
 	dawg_builder.Finish(&dawg);
 	std::cout << "no. states: "
 		<< dawg.num_of_states() << std::endl;
@@ -42,7 +40,7 @@ bool BuildDictionary(const char *lexicon_file_name,
 		<< dawg.num_of_merged_states() << std::endl;
 
 	// Builds a dictionary from a dawg.
-	if (!nanika::dawgdic::DictionaryBuilder::Build(dawg, dic))
+	if (!dawgdic::DictionaryBuilder::Build(dawg, dic))
 	{
 		std::cerr << "error: failed to build dictionary" << std::endl;
 		return false;
@@ -54,7 +52,7 @@ bool BuildDictionary(const char *lexicon_file_name,
 }
 
 // Writes a dictionary to a file.
-bool SaveDictionary(const nanika::dawgdic::Dictionary &dic,
+bool SaveDictionary(const dawgdic::Dictionary &dic,
 	const char *dic_file_name)
 {
 	std::cerr << "output: " << dic_file_name << std::endl;
@@ -91,7 +89,7 @@ int main(int argc, char *argv[])
 	const char *lexicon_file_name = argv[1];
 	const char *dic_file_name = argv[2];
 
-	nanika::dawgdic::Dictionary dic;
+	dawgdic::Dictionary dic;
 	if (!BuildDictionary(lexicon_file_name, &dic))
 		return 1;
 
