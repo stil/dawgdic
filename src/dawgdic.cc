@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "dawgdic/dictionary.h"
-#include "dawgdic/dictionary-explorer.h"
 
 // Loads a dictionary file.
 bool LoadDictionary(const char *dic_file_name, dawgdic::Dictionary *dic)
@@ -40,19 +39,6 @@ bool FindKeys(const dawgdic::Dictionary &dic, std::istream *input)
 	std::string line;
 	while (std::getline(*input, line))
 	{
-		// The following two examples give the same results.
-#ifdef USE_DICTIONARY_EXPLORER
-		dawgdic::DictionaryExplorer explorer(dic);
-		for (std::size_t i = 0; i < line.length(); ++i)
-		{
-			if (!explorer.Follow(line[i]))
-				break;
-
-			// Reads a value.
-			if (explorer.has_value())
-				lengths.push_back(i + 1);
-		}
-#else  // USE_DICTIONARY_EXPLORER
 		dawgdic::BaseType index = dic.root();
 		for (std::size_t i = 0; i < line.length(); ++i)
 		{
@@ -63,7 +49,6 @@ bool FindKeys(const dawgdic::Dictionary &dic, std::istream *input)
 			if (dic.has_value(index))
 				lengths.push_back(i + 1);
 		}
-#endif  // USE_DICTIONARY_EXPLORER
 
 		if (lengths.empty())
 			std::cout << line << ": not found" << std::endl;
