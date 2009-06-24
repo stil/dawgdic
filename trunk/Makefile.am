@@ -14,6 +14,5 @@ dawgdic_include_HEADERS = \
 	src/dawgdic/dictionary-builder.h \
 	src/dawgdic/dictionary-extra-unit.h \
 	src/dawgdic/dictionary-unit.h \
-	src/dawgdic/dictionary-explorer.h \
 	src/dawgdic/object-pool.h
 
