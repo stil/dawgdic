@@ -5,8 +5,7 @@
 #include "dawgdic/dictionary-builder.h"
 
 // Builds a dictionary from a sorted lexicon.
-bool BuildDictionary(const char *lexicon_file_name,
-	dawgdic::Dictionary *dic)
+bool BuildDictionary(const char *lexicon_file_name, dawgdic::Dictionary *dic)
 {
 	std::cerr << "input: " << lexicon_file_name << std::endl;
 
@@ -22,6 +21,7 @@ bool BuildDictionary(const char *lexicon_file_name,
 	// Reads keys and inserts them into a dawg.
 	dawgdic::DawgBuilder dawg_builder;
 	std::string key;
+	std::size_t key_count = 0;
 	while (std::getline(lexicon_file, key))
 	{
 		if (!dawg_builder.Insert(key.c_str()))
@@ -29,15 +29,22 @@ bool BuildDictionary(const char *lexicon_file_name,
 			std::cerr << "error: failed to insert key: " << key << std::endl;
 			return false;
 		}
+
+		if (++key_count % 10000 == 0)
+			std::cerr << "no. keys: " << key_count << '\r';
 	}
 	dawgdic::Dawg dawg;
 	dawg_builder.Finish(&dawg);
-	std::cout << "no. states: "
+	std::cerr << "no. keys: " << key_count << std::endl;
+
+	std::cerr << "no. states: "
 		<< dawg.num_of_states() << std::endl;
-	std::cout << "no. transitions: "
+	std::cerr << "no. transitions: "
 		<< dawg.num_of_transitions() << std::endl;
-	std::cout << "no. merged states: "
+	std::cerr << "no. merged states: "
 		<< dawg.num_of_merged_states() << std::endl;
+	std::cerr << "no. merging states: "
+		<< dawg.num_of_merging_states() << std::endl;
 
 	// Builds a dictionary from a dawg.
 	if (!dawgdic::DictionaryBuilder::Build(dawg, dic))
@@ -45,8 +52,8 @@ bool BuildDictionary(const char *lexicon_file_name,
 		std::cerr << "error: failed to build dictionary" << std::endl;
 		return false;
 	}
-	std::cout << "no. elements: " << dic->size() << std::endl;
-	std::cout << "dictionary size: " << dic->total_size() << std::endl;
+	std::cerr << "no. elements: " << dic->size() << std::endl;
+	std::cerr << "dictionary size: " << dic->total_size() << std::endl;
 
 	return true;
 }
