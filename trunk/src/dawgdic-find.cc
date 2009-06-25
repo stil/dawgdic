@@ -8,7 +8,7 @@
 // Loads a dictionary file.
 bool LoadDictionary(const char *dic_file_name, dawgdic::Dictionary *dic)
 {
-	std::cerr << "output: " << dic_file_name << std::endl;
+	std::cerr << "input: " << dic_file_name << std::endl;
 
 	// Opens an input file.
 	std::ifstream dic_file(dic_file_name, std::ios::binary);

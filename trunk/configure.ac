@@ -3,7 +3,7 @@
 
 AC_PREREQ(2.61)
 AC_INIT(dawgdic, 0.3.0, syata@acm.org)
-AC_CONFIG_SRCDIR([src/make-dawgdic.cc])
+AC_CONFIG_SRCDIR([src/dawgdic-build.cc])
 AM_INIT_AUTOMAKE
 
 # Checks for programs.
@@ -22,5 +22,5 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_HEADER_STDC
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile test/Makefile])
 AC_OUTPUT

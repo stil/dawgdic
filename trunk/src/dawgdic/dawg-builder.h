@@ -14,32 +14,30 @@ namespace dawgdic {
 class DawgBuilder
 {
 public:
-	typedef ObjectPool<BaseType> BasePoolType;
-	typedef ObjectPool<UCharType> LabelPoolType;
-	typedef ObjectPool<DawgUnit> UnitPoolType;
-
 	enum { DEFAULT_INITIAL_HASH_TABLE_SIZE = 1 << 8 };
 
 	explicit DawgBuilder(SizeType initial_hash_table_size =
 		DEFAULT_INITIAL_HASH_TABLE_SIZE)
 		: initial_hash_table_size_(initial_hash_table_size),
-		state_pool_(), label_pool_(), unit_pool_(), hash_table_(),
-		unfixed_units_(), unused_units_(),
-		num_of_states_(0), num_of_merged_states_(0) {}
+		base_pool_(), label_pool_(), flag_pool_(), unit_pool_(),
+		hash_table_(), unfixed_units_(), unused_units_(), num_of_states_(0),
+		num_of_merged_states_(0), num_of_merging_states_(0) {}
 
 	// Number of fixed transitions.
-	SizeType size() const { return state_pool_.size(); }
+	SizeType size() const { return base_pool_.size(); }
 	// Number of transitions.
-	SizeType num_of_transitions() const { return state_pool_.size(); }
+	SizeType num_of_transitions() const { return base_pool_.size(); }
 	// Number of states.
 	SizeType num_of_states() const { return num_of_states_; }
 	// Number of merged states.
 	SizeType num_of_merged_states() const { return num_of_merged_states_; }
+	// Number of merging states.
+	SizeType num_of_merging_states() const { return num_of_merging_states_; }
 
 	// Initializes a builder.
 	void Clear()
 	{
-		state_pool_.Clear();
+		base_pool_.Clear();
 		label_pool_.Clear();
 		unit_pool_.Clear();
 		std::vector<BaseType>(0).swap(hash_table_);
@@ -73,7 +71,7 @@ public:
 		BaseType index = 0;
 		SizeType key_pos = 0;
 
-		// Finds a separate state.
+		// Finds a separate unit.
 		for ( ; key_pos <= length; ++key_pos)
 		{
 			BaseType child_index = unit_pool_[index].child();
@@ -90,14 +88,14 @@ public:
 			else if (key_label > unit_label)
 			{
 				unit_pool_[child_index].set_has_sibling(true);
-				FixStates(child_index);
+				FixUnits(child_index);
 				break;
 			}
 
 			index = child_index;
 		}
 
-		// Adds new states.
+		// Adds new units.
 		for ( ; key_pos <= length; ++key_pos)
 		{
 			UCharType key_label = static_cast<UCharType>(
@@ -124,26 +122,34 @@ public:
 		if (hash_table_.empty())
 			Init();
 
-		FixStates(0);
-		state_pool_[0] = unit_pool_[0].base();
+		FixUnits(0);
+		base_pool_[0] = unit_pool_[0].base();
 		label_pool_[0] = unit_pool_[0].label();
 
-		Dawg(&state_pool_, &label_pool_,
-			num_of_states_, num_of_merged_states_).Swap(dawg);
+		dawg->set_num_of_states(num_of_states_);
+		dawg->set_num_of_merged_states(num_of_merged_states_);
+		dawg->set_num_of_merging_states(num_of_merging_states_);
+
+		dawg->SwapBasePool(&base_pool_);
+		dawg->SwapLabelPool(&label_pool_);
+		dawg->SwapFlagPool(&flag_pool_);
+
 		Clear();
 		return true;
 	}
 
 private:
 	const SizeType initial_hash_table_size_;
-	BasePoolType state_pool_;
-	LabelPoolType label_pool_;
-	UnitPoolType unit_pool_;
+	ObjectPool<BaseType> base_pool_;
+	ObjectPool<UCharType> label_pool_;
+	ObjectPool<UCharType> flag_pool_;
+	ObjectPool<DawgUnit> unit_pool_;
 	std::vector<BaseType> hash_table_;
 	std::stack<BaseType> unfixed_units_;
 	std::stack<BaseType> unused_units_;
 	SizeType num_of_states_;
 	SizeType num_of_merged_states_;
+	SizeType num_of_merging_states_;
 
 	// Disallows copies.
 	DawgBuilder(const DawgBuilder &);
@@ -154,14 +160,14 @@ private:
 	{
 		hash_table_.resize(initial_hash_table_size_, 0);
 		AllocateUnit();
-		AllocateState();
+		AllocateTransition();
 		unit_pool_[0].set_label(0xFF);
 		unfixed_units_.push(0);
 	}
 
-	// Fixes states corresponding to the last inserted key.
-	// Also, merges equivalent states.
-	void FixStates(BaseType index)
+	// Fixes units corresponding to the last inserted key.
+	// Also, some of units are merged into equivalent transitions.
+	void FixUnits(BaseType index)
 	{
 		while (unfixed_units_.top() != index)
 		{
@@ -178,30 +184,41 @@ private:
 
 			BaseType hash_id;
 			BaseType matched_index = FindUnit(unfixed_index, &hash_id);
-			if (matched_index)
+			if (matched_index != 0)
+			{
 				num_of_merged_states_ += num_of_siblings;
+
+				// Records a merging state.
+				BaseType flag_index = matched_index / 8;
+				UCharType flag_bit =
+					static_cast<UCharType>(1) << (matched_index % 8);
+				if ((flag_pool_[flag_index] & flag_bit) == 0)
+				{
+					++num_of_merging_states_;
+					flag_pool_[flag_index] |= flag_bit;
+				}
+			}
 			else
 			{
-				// Fixes units.
-				// A fixed unit is converted to a pair of a state and a label.
-				BaseType state_index = 0;
+				// Fixes units into pairs of base values and labels.
+				BaseType transition_index = 0;
 				for (BaseType i = 0; i < num_of_siblings; ++i)
-					state_index = AllocateState();
+					transition_index = AllocateTransition();
 				for (BaseType i = unfixed_index; i != 0;
 					i = unit_pool_[i].sibling())
 				{
-					state_pool_[state_index] = unit_pool_[i].base();
-					label_pool_[state_index] = unit_pool_[i].label();
-					--state_index;
+					base_pool_[transition_index] = unit_pool_[i].base();
+					label_pool_[transition_index] = unit_pool_[i].label();
+					--transition_index;
 				}
-				matched_index = state_index + 1;
+				matched_index = transition_index + 1;
 				hash_table_[hash_id] = matched_index;
 				++num_of_states_;
 			}
 
 			// Deletes fixed units.
-			for (BaseType current = unfixed_index, next; current;
-				current = next)
+			for (BaseType current = unfixed_index, next;
+				current != 0; current = next)
 			{
 				next = unit_pool_[current].sibling();
 				FreeUnit(current);
@@ -221,30 +238,30 @@ private:
 
 		// Builds a new hash table.
 		BaseType count = 0;
-		for (SizeType i = 1; i < state_pool_.size(); ++i)
+		for (SizeType i = 1; i < base_pool_.size(); ++i)
 		{
 			BaseType index = static_cast<BaseType>(i);
-			if (label_pool_[index] == '\0' || state_pool_[index] & 2)
+			if (label_pool_[index] == '\0' || base_pool_[index] & 2)
 			{
 				BaseType hash_id;
-				FindState(index, &hash_id);
+				FindTransition(index, &hash_id);
 				hash_table_[hash_id] = index;
 				++count;
 			}
 		}
 	}
 
-	// Finds a state from a hash table.
-	BaseType FindState(BaseType state_index, BaseType *hash_id) const
+	// Finds a transition from a hash table.
+	BaseType FindTransition(BaseType index, BaseType *hash_id) const
 	{
-		*hash_id = HashState(state_index) % hash_table_.size();
+		*hash_id = HashTransition(index) % hash_table_.size();
 		for ( ; ; *hash_id = (*hash_id + 1) % hash_table_.size())
 		{
-			BaseType state_id = hash_table_[*hash_id];
-			if (!state_id)
+			BaseType transition_id = hash_table_[*hash_id];
+			if (transition_id == 0)
 				break;
 
-			// There must not be equivalent states.
+			// There must not be the same base value.
 		}
 		return 0;
 	}
@@ -255,63 +272,62 @@ private:
 		*hash_id = HashUnit(unit_index) % hash_table_.size();
 		for ( ; ; *hash_id = (*hash_id + 1) % hash_table_.size())
 		{
-			BaseType state_id = hash_table_[*hash_id];
-			if (!state_id)
+			BaseType transition_id = hash_table_[*hash_id];
+			if (transition_id == 0)
 				break;
 
-			if (AreEqual(unit_index, state_id))
-				return state_id;
+			if (AreEqual(unit_index, transition_id))
+				return transition_id;
 		}
 		return 0;
 	}
 
-	// Compares a unit and a state.
-	bool AreEqual(BaseType unit_index, BaseType state_index) const
+	// Compares a unit and a transition.
+	bool AreEqual(BaseType unit_index, BaseType transition_index) const
 	{
 		// Compares the numbers of transitions.
-		for (BaseType i = unit_pool_[unit_index].sibling(); i;
+		for (BaseType i = unit_pool_[unit_index].sibling(); i != 0;
 			i = unit_pool_[i].sibling())
 		{
-			if (!(state_pool_[state_index] & 1))
+			if (!(base_pool_[transition_index] & 1))
 				return false;
-			++state_index;
+			++transition_index;
 		}
-		if (state_pool_[state_index] & 1)
+		if (base_pool_[transition_index] & 1)
 			return false;
 
 		// Compares out-transitions.
 		for (BaseType i = unit_index; i;
-			i = unit_pool_[i].sibling(), --state_index)
+			i = unit_pool_[i].sibling(), --transition_index)
 		{
-			if (unit_pool_[i].base() != state_pool_[state_index] ||
-				unit_pool_[i].label() != label_pool_[state_index])
+			if (unit_pool_[i].base() != base_pool_[transition_index] ||
+				unit_pool_[i].label() != label_pool_[transition_index])
 				return false;
 		}
 		return true;
 	}
 
-	// Calculates a hash value from a state.
-	BaseType HashState(BaseType state_index) const
+	// Calculates a hash value from a transition.
+	BaseType HashTransition(BaseType index) const
 	{
 		BaseType hash_value = 0;
-		for ( ; state_index; state_index = state_pool_[state_index] & 1 ?
-			state_index + 1 : 0)
+		for ( ; index != 0; index = (base_pool_[index] & 1) ? index + 1 : 0)
 		{
-			BaseType base = state_pool_[state_index];
-			UCharType label = label_pool_[state_index];
+			BaseType base = base_pool_[index];
+			UCharType label = label_pool_[index];
 			hash_value ^= Hash((label << 24) ^ base);
 		}
 		return hash_value;
 	}
 
 	// Calculates a hash value from a unit.
-	BaseType HashUnit(BaseType unit_index) const
+	BaseType HashUnit(BaseType index) const
 	{
 		BaseType hash_value = 0;
-		for ( ; unit_index; unit_index = unit_pool_[unit_index].sibling())
+		for ( ; index != 0; index = unit_pool_[index].sibling())
 		{
-			BaseType base = unit_pool_[unit_index].base();
-			UCharType label = unit_pool_[unit_index].label();
+			BaseType base = unit_pool_[index].base();
+			UCharType label = unit_pool_[index].label();
 			hash_value ^= Hash((label << 24) ^ base);
 		}
 		return hash_value;
@@ -330,10 +346,15 @@ private:
 		return key;
 	}
 
-	// Gets a state object from an object pool.
-	BaseType AllocateState()
+	// Gets a transition object from object pools.
+	BaseType AllocateTransition()
 	{
-		state_pool_.Allocate();
+		if ((base_pool_.size() % 8) == 0)
+		{
+			SizeType index = flag_pool_.Allocate();
+			flag_pool_[index] = '\0';
+		}
+		base_pool_.Allocate();
 		return static_cast<BaseType>(label_pool_.Allocate());
 	}
 
