@@ -105,7 +105,8 @@ private:
 
 		// Already arranged.
 		BaseType dawg_child_index = dawg_.child(dawg_index);
-		if (offsets_[dawg_child_index])
+		if (dawg_.is_merging(dawg_child_index) &&
+			offsets_[dawg_child_index] != 0)
 		{
 			BaseType offset = offsets_[dawg_child_index] ^ dic_index;
 			if (!(offset & LOWER_MASK) || !(offset & UPPER_MASK))
