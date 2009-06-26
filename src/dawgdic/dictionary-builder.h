@@ -6,6 +6,7 @@
 #include "dawg.h"
 #include "dictionary.h"
 #include "dictionary-extra-unit.h"
+#include "link-table.h"
 
 namespace dawgdic {
 
@@ -19,7 +20,7 @@ public:
 		// Number of blocks kept unfixed.
 		NUM_OF_UNFIXED_BLOCKS = 16,
 		// Number of units kept unfixed.
-		UNFIXED_SIZE = BLOCK_SIZE * NUM_OF_UNFIXED_BLOCKS,
+		UNFIXED_SIZE = BLOCK_SIZE * NUM_OF_UNFIXED_BLOCKS
 	};
 
 	// Builds a dictionary from a list-form dawg.
@@ -40,18 +41,18 @@ private:
 
 	std::vector<DictionaryUnit> units_;
 	std::vector<DictionaryExtraUnit *> extras_;
-	std::vector<BaseType> offsets_;
 	std::vector<UCharType> labels_;
+	LinkTable link_table_;
 	BaseType unfixed_index_;
 	BaseType num_of_unused_units_;
 
 	// Masks for offsets.
-	static const BaseType LOWER_MASK = DictionaryUnit::OFFSET_MAX - 1;
-	static const BaseType UPPER_MASK = ~LOWER_MASK;
+	static const BaseType UPPER_MASK = ~(DictionaryUnit::OFFSET_MAX - 1);
+	static const BaseType LOWER_MASK = 0xFF;
 
 	DictionaryBuilder(const Dawg &dawg, Dictionary *dic)
-		: dawg_(dawg), dic_(dic), units_(), extras_(),
-		offsets_(), labels_(), unfixed_index_(), num_of_unused_units_(0) {}
+		: dawg_(dawg), dic_(dic), units_(), extras_(), labels_(),
+		link_table_(), unfixed_index_(), num_of_unused_units_(0) {}
 	~DictionaryBuilder()
 	{
 		for (SizeType i = 0; i < extras_.size(); ++i)
@@ -82,7 +83,8 @@ private:
 	// Builds a dictionary from a list-form dawg.
 	bool BuildDictionary()
 	{
-		std::vector<BaseType>(dawg_.size(), 0).swap(offsets_);
+		link_table_.Init(dawg_.num_of_merging_states() +
+			(dawg_.num_of_merging_states() >> 1));
 
 		ReserveUnit(0);
 		extras(0).set_is_used();
@@ -97,33 +99,37 @@ private:
 		return true;
 	}
 
-	// Builds a dictionary from a list-form dawg.
+	// Builds a dictionary from a dawg.
 	bool BuildDictionary(BaseType dawg_index, BaseType dic_index)
 	{
 		if (dawg_.is_leaf(dawg_index))
 			return true;
 
-		// Already arranged.
+		// Uses an existing offset if available.
 		BaseType dawg_child_index = dawg_.child(dawg_index);
-		if (dawg_.is_merging(dawg_child_index) &&
-			offsets_[dawg_child_index] != 0)
+		if (dawg_.is_merging(dawg_child_index))
 		{
-			BaseType offset = offsets_[dawg_child_index] ^ dic_index;
-			if (!(offset & LOWER_MASK) || !(offset & UPPER_MASK))
+			BaseType offset = link_table_.Find(dawg_child_index);
+			if (offset != 0)
 			{
-				if (dawg_.is_leaf(dawg_child_index))
-					units(dic_index).set_has_leaf();
-				if (!units(dic_index).set_offset(offset))
-					return false;
-				return true;
+				offset ^= dic_index;
+				if (!(offset & UPPER_MASK) || !(offset & LOWER_MASK))
+				{
+					if (dawg_.is_leaf(dawg_child_index))
+						units(dic_index).set_has_leaf();
+					units(dic_index).set_offset(offset);
+					return true;
+				}
 			}
 		}
 
-		// Finds a good offset.
+		// Finds a good offset and arranges child nodes.
 		BaseType offset = ArrangeChildNodes(dawg_index, dic_index);
 		if (!offset)
 			return false;
-		offsets_[dawg_child_index] = offset;
+
+		if (dawg_.is_merging(dawg_child_index))
+			link_table_.Insert(dawg_child_index, offset);
 
 		// Builds a double-array in depth-first order.
 		do
@@ -198,9 +204,6 @@ private:
 	// Checks if a given offset is valid or not.
 	bool IsGoodOffset(BaseType index, BaseType offset) const
 	{
-		static const BaseType LOWER_MASK = DictionaryUnit::OFFSET_MAX - 1;
-		static const BaseType UPPER_MASK = ~LOWER_MASK;
-
 		if (extras(offset).is_used())
 			return false;
 
