@@ -1,8 +1,8 @@
-#include <fstream>
-#include <iostream>
-
 #include "dawgdic/dawg-builder.h"
 #include "dawgdic/dictionary-builder.h"
+
+#include <fstream>
+#include <iostream>
 
 // Builds a dictionary from a sorted lexicon.
 bool BuildDictionary(const char *lexicon_file_name, dawgdic::Dictionary *dic)
@@ -35,8 +35,8 @@ bool BuildDictionary(const char *lexicon_file_name, dawgdic::Dictionary *dic)
 	}
 	dawgdic::Dawg dawg;
 	dawg_builder.Finish(&dawg);
-	std::cerr << "no. keys: " << key_count << std::endl;
 
+	std::cerr << "no. keys: " << key_count << std::endl;
 	std::cerr << "no. states: "
 		<< dawg.num_of_states() << std::endl;
 	std::cerr << "no. transitions: "
@@ -47,12 +47,17 @@ bool BuildDictionary(const char *lexicon_file_name, dawgdic::Dictionary *dic)
 		<< dawg.num_of_merging_states() << std::endl;
 
 	// Builds a dictionary from a dawg.
-	if (!dawgdic::DictionaryBuilder::Build(dawg, dic))
+	dawgdic::BaseType num_of_unused_units;
+	if (!dawgdic::DictionaryBuilder::Build(dawg, dic, &num_of_unused_units))
 	{
 		std::cerr << "error: failed to build dictionary" << std::endl;
 		return false;
 	}
+	double unused_ratio = 100.0 * num_of_unused_units / dic->size();
+
 	std::cerr << "no. elements: " << dic->size() << std::endl;
+	std::cerr << "no. unused elements: " << num_of_unused_units
+		<< " (" << unused_ratio << "%)" << std::endl;
 	std::cerr << "dictionary size: " << dic->total_size() << std::endl;
 
 	return true;

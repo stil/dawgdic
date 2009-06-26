@@ -8,6 +8,8 @@ dawgdic_includedir = $(includedir)/dawgdic
 
 dawgdic_include_HEADERS = \
 	dawgdic/base-types.h \
+	dawgdic/base-unit.h \
+	dawgdic/bit-pool.h \
 	dawgdic/dawg.h \
 	dawgdic/dawg-builder.h \
 	dawgdic/dawg-unit.h \
@@ -15,4 +17,5 @@ dawgdic_include_HEADERS = \
 	dawgdic/dictionary-builder.h \
 	dawgdic/dictionary-extra-unit.h \
 	dawgdic/dictionary-unit.h \
+	dawgdic/link-table.h \
 	dawgdic/object-pool.h

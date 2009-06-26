@@ -1,9 +1,9 @@
+#include "dawgdic/dictionary.h"
+
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include "dawgdic/dictionary.h"
 
 // Loads a dictionary file.
 bool LoadDictionary(const char *dic_file_name, dawgdic::Dictionary *dic)
