@@ -1,10 +1,9 @@
 #ifndef DAWGDIC_DAWG_H
 #define DAWGDIC_DAWG_H
 
-#include "base-types.h"
+#include "base-unit.h"
+#include "bit-pool.h"
 #include "object-pool.h"
-
-#include <iostream>
 
 namespace dawgdic {
 
@@ -29,17 +28,15 @@ public:
 
 	// Reads values.
 	BaseType child(BaseType index) const
-	{ return base_pool_[index] >> 2; }
+	{ return base_pool_[index].child(); }
 	BaseType sibling(BaseType index) const
-	{ return (base_pool_[index] & 1) ? (index + 1) : 0; }
+	{ return base_pool_[index].has_sibling() ? (index + 1) : 0; }
 	ValueType value(BaseType index) const
-	{ return static_cast<ValueType>(base_pool_[index] >> 1); }
-	bool is_leaf(BaseType index) const
-	{ return label(index) == '\0'; }
-	UCharType label(BaseType index) const
-	{ return label_pool_[index]; }
-	bool is_merging(BaseType index) const
-	{ return (flag_pool_[index / 8] & (1 << (index % 8))) ? true : false; }
+	{ return base_pool_[index].value(); }
+
+	bool is_leaf(BaseType index) const { return label(index) == '\0'; }
+	UCharType label(BaseType index) const { return label_pool_[index]; }
+	bool is_merging(BaseType index) const { return flag_pool_.get(index); }
 
 	// Clears object pools.
 	void Clear()
@@ -71,7 +68,7 @@ public:
 	}
 
 	// Swaps base pools.
-	void SwapBasePool(ObjectPool<BaseType> *base_pool)
+	void SwapBasePool(ObjectPool<BaseUnit> *base_pool)
 	{
 		base_pool_.Swap(base_pool);
 	}
@@ -81,15 +78,15 @@ public:
 		label_pool_.Swap(label_pool);
 	}
 	// Swaps flag pools.
-	void SwapFlagPool(ObjectPool<UCharType> *flag_pool)
+	void SwapFlagPool(BitPool<> *flag_pool)
 	{
 		flag_pool_.Swap(flag_pool);
 	}
 
 private:
-	ObjectPool<BaseType> base_pool_;
+	ObjectPool<BaseUnit> base_pool_;
 	ObjectPool<UCharType> label_pool_;
-	ObjectPool<UCharType> flag_pool_;
+	BitPool<> flag_pool_;
 	SizeType num_of_states_;
 	SizeType num_of_merged_states_;
 	SizeType num_of_merging_states_;

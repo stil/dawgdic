@@ -14,8 +14,6 @@ namespace dawgdic {
 class DawgBuilder
 {
 public:
-	enum { DEFAULT_INITIAL_HASH_TABLE_SIZE = 1 << 8 };
-
 	explicit DawgBuilder(SizeType initial_hash_table_size =
 		DEFAULT_INITIAL_HASH_TABLE_SIZE)
 		: initial_hash_table_size_(initial_hash_table_size),
@@ -40,13 +38,16 @@ public:
 		base_pool_.Clear();
 		label_pool_.Clear();
 		unit_pool_.Clear();
+
 		std::vector<BaseType>(0).swap(hash_table_);
 		while (!unfixed_units_.empty())
 			unfixed_units_.pop();
 		while (!unused_units_.empty())
 			unused_units_.pop();
+
 		num_of_states_ = 0;
 		num_of_merged_states_ = 0;
+		num_of_merging_states_ = 0;
 	}
 
 	// Inserts a key.
@@ -123,7 +124,7 @@ public:
 			Init();
 
 		FixUnits(0);
-		base_pool_[0] = unit_pool_[0].base();
+		base_pool_[0].set_base(unit_pool_[0].base());
 		label_pool_[0] = unit_pool_[0].label();
 
 		dawg->set_num_of_states(num_of_states_);
@@ -139,10 +140,12 @@ public:
 	}
 
 private:
+	enum { DEFAULT_INITIAL_HASH_TABLE_SIZE = 1 << 8 };
+
 	const SizeType initial_hash_table_size_;
-	ObjectPool<BaseType> base_pool_;
+	ObjectPool<BaseUnit> base_pool_;
 	ObjectPool<UCharType> label_pool_;
-	ObjectPool<UCharType> flag_pool_;
+	BitPool<> flag_pool_;
 	ObjectPool<DawgUnit> unit_pool_;
 	std::vector<BaseType> hash_table_;
 	std::stack<BaseType> unfixed_units_;
@@ -189,13 +192,10 @@ private:
 				num_of_merged_states_ += num_of_siblings;
 
 				// Records a merging state.
-				BaseType flag_index = matched_index / 8;
-				UCharType flag_bit =
-					static_cast<UCharType>(1) << (matched_index % 8);
-				if ((flag_pool_[flag_index] & flag_bit) == 0)
+				if (flag_pool_.get(matched_index) == false)
 				{
 					++num_of_merging_states_;
-					flag_pool_[flag_index] |= flag_bit;
+					flag_pool_.set(matched_index, true);
 				}
 			}
 			else
@@ -207,7 +207,8 @@ private:
 				for (BaseType i = unfixed_index; i != 0;
 					i = unit_pool_[i].sibling())
 				{
-					base_pool_[transition_index] = unit_pool_[i].base();
+					base_pool_[transition_index].set_base(
+						unit_pool_[i].base());
 					label_pool_[transition_index] = unit_pool_[i].label();
 					--transition_index;
 				}
@@ -241,7 +242,7 @@ private:
 		for (SizeType i = 1; i < base_pool_.size(); ++i)
 		{
 			BaseType index = static_cast<BaseType>(i);
-			if (label_pool_[index] == '\0' || base_pool_[index] & 2)
+			if (label_pool_[index] == '\0' || base_pool_[index].is_state())
 			{
 				BaseType hash_id;
 				FindTransition(index, &hash_id);
@@ -289,18 +290,18 @@ private:
 		for (BaseType i = unit_pool_[unit_index].sibling(); i != 0;
 			i = unit_pool_[i].sibling())
 		{
-			if (!(base_pool_[transition_index] & 1))
+			if (base_pool_[transition_index].has_sibling() == false)
 				return false;
 			++transition_index;
 		}
-		if (base_pool_[transition_index] & 1)
+		if (base_pool_[transition_index].has_sibling() == true)
 			return false;
 
 		// Compares out-transitions.
 		for (BaseType i = unit_index; i;
 			i = unit_pool_[i].sibling(), --transition_index)
 		{
-			if (unit_pool_[i].base() != base_pool_[transition_index] ||
+			if (unit_pool_[i].base() != base_pool_[transition_index].base() ||
 				unit_pool_[i].label() != label_pool_[transition_index])
 				return false;
 		}
@@ -311,11 +312,14 @@ private:
 	BaseType HashTransition(BaseType index) const
 	{
 		BaseType hash_value = 0;
-		for ( ; index != 0; index = (base_pool_[index] & 1) ? index + 1 : 0)
+		for ( ; index != 0; ++index)
 		{
-			BaseType base = base_pool_[index];
+			BaseType base = base_pool_[index].base();
 			UCharType label = label_pool_[index];
 			hash_value ^= Hash((label << 24) ^ base);
+
+			if (base_pool_[index].has_sibling() == false)
+				break;
 		}
 		return hash_value;
 	}
@@ -346,19 +350,15 @@ private:
 		return key;
 	}
 
-	// Gets a transition object from object pools.
+	// Gets a transition from object pools.
 	BaseType AllocateTransition()
 	{
-		if ((base_pool_.size() % 8) == 0)
-		{
-			SizeType index = flag_pool_.Allocate();
-			flag_pool_[index] = '\0';
-		}
+		flag_pool_.Allocate();
 		base_pool_.Allocate();
 		return static_cast<BaseType>(label_pool_.Allocate());
 	}
 
-	// Gets a unit object from an object pool.
+	// Gets a unit from an object pool.
 	BaseType AllocateUnit()
 	{
 		BaseType index = 0;
@@ -373,7 +373,7 @@ private:
 		return index;
 	}
 
-	// Returns a unit object to an object pool.
+	// Returns a unit to an object pool.
 	void FreeUnit(BaseType index) { unused_units_.push(index); }
 };
 
