@@ -7,10 +7,10 @@
 以下の例は，辞書からキーを検索する関数である．
 
 {{{
-#include <nanika/dawgdic/dictionary.h>
+#include <dawgdic/dictionary.h>
 
 // 辞書引きをおこなう．
-void Lookup(const nanika::dawgdic::Dictionary &dic, const char *key) {
+void Lookup(const dawgdic::Dictionary &dic, const char *key) {
 
   // キーが辞書に登録されているかどうかを確認する．
   if (dic.Contains(key))
@@ -35,27 +35,25 @@ void Lookup(const nanika::dawgdic::Dictionary &dic, const char *key) {
 {{{
 #include <string>
 
-#include <nanika/dawgdic/dictionary.h>
-#include <nanika/dawgdic/dictionary-explorer.h>
+#include <dawgdic/dictionary.h>
 
 // 文字列 "text" に出現するすべてのキーを見つける．
-void Filter(const nanika::dawgdic::Dictionary &dic, const char *text) {
+void Filter(const dawgdic::Dictionary &dic, const char *text) {
 
-  nanika::dawgdic::DictionaryExplorer explorer(dic);
   for (const char *p = text; *p != '\0'; ++p) {
 
     // 始点を変更しつつ，前方一致検索をおこなう．
-    explorer.Reset();
+    dawgdic::BaseType index = dic.root();
     for (const char *q = p; *q != '\0'; ++q) {
 
       // 遷移を一つずつ辿る．
-      if (!explorer.Follow(*q))
+      if (!dic.Follow(*q, &index))
         break;
 
       // 検出したキーの情報を出力する．
-      if (explorer.has_value())
+      if (dic.has_value(index))
         std::cout << '(' << (p - text) << ", " << (q + 1 - p) << ", "
-                  << explorer.value() << "): "
+                  << dic.value(index) << "): "
                   << std::string(p, q + 1 - p) << std::endl;
     }
   }

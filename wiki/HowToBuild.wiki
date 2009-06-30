@@ -12,15 +12,15 @@ Finally, this function writes the dictionary into an output stream.
 #include <iostream>
 #include <string>
 
-#include <nanika/dawgdic/dawg-builder.h>
-#include <nanika/dawgdic/dictionary-builder.h>
+#include <dawgdic/dawg-builder.h>
+#include <dawgdic/dictionary-builder.h>
 
 // Builds a dictionary from a sorted lexicon in "lexicon_input"
 // and writes the dictionary into "dic_output".
 bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
 
   // Keys must be inserted in lexicographic order.
-  nanika::dawgdic::DawgBuilder dawg_builder;
+  dawgdic::DawgBuilder dawg_builder;
   std::string key;
   while (std::getline(*lexicon_input, key)) {
 
@@ -42,12 +42,12 @@ bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
   }
 
   // Finishes dictionary construction and initializes "dawg_builder".
-  nanika::dawgdic::Dawg dawg;
+  dawgdic::Dawg dawg;
   dawg_builder.Finish(&dawg);
 
   // Builds a dictionary from a dawg.
-  nanika::dawgdic::Dictionary dic;
-  if (!nanika::dawgdic::DictionaryBuilder::Build(dawg, &dic))
+  dawgdic::Dictionary dic;
+  if (!dawgdic::DictionaryBuilder::Build(dawg, &dic))
     return false;
 
   // Writes a dictionary into an output stream.

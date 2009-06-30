@@ -7,19 +7,17 @@
 The main classes of this library are given as follows:
 
 || *Header* || *Namespace* || *Class* ||
-|| nanika/dawgdic/dawg.h || nanika::dawgdic || Dawg ||
-|| nanika/dawgdic/dawg-builder.h || nanika::dawgdic || !DawgBuilder ||
-|| nanika/dawgdic/dictionary.h || nanika::dawgdic || Dictionary ||
-|| nanika/dawgdic/dictionary-builder.h || nanika::dawgdic || !DictionaryBuilder ||
-|| nanika/dawgdic/dictionary-explorer.h || nanika::dawgdic || !DictionaryExplorer ||
-|| nanika/ios/line-reader.h || nanika::ios || !LineReader ||
+|| dawgdic/dawg.h || dawgdic || Dawg ||
+|| dawgdic/dawg-builder.h || dawgdic || !DawgBuilder ||
+|| dawgdic/dictionary.h || dawgdic || Dictionary ||
+|| dawgdic/dictionary-builder.h || dawgdic || !DictionaryBuilder ||
 
 ----
 
 == Dawg ==
 
-|| *Header* || nanika/dawgdic/dawg.h ||
-|| *Namespace* || nanika::dawgdic ||
+|| *Header* || dawgdic/dawg.h ||
+|| *Namespace* || dawgdic ||
 
 {{{
 // Number of transitions.
@@ -47,8 +45,8 @@ This function returns the number of states merged in building a dawg.
 
 == !DawgBuilder ==
 
-|| *Header* || nanika/dawgdic/dawg-builder.h ||
-|| *Namespace* || nanika::dawgdic ||
+|| *Header* || dawgdic/dawg-builder.h ||
+|| *Namespace* || dawgdic ||
 
 {{{
 // Number of transitions.
@@ -95,8 +93,8 @@ Then, *this* object will be initialized.
 
 == Dictionary ==
 
-|| *Header* || nanika/dawgdic/dictionary.h ||
-|| *Namespace* || nanika::dawgdic ||
+|| *Header* || dawgdic/dictionary.h ||
+|| *Namespace* || dawgdic ||
 
 {{{
 const DictionaryUnit *units() const;
@@ -165,9 +163,13 @@ bool Follow(const CharType *s, SizeType length, BaseType *index);
 bool Follow(const CharType *s, SizeType length, BaseType *index, SizeType *count);
 }}}
 
-These functions are provided for prefix matching,
-see also *nanika::dawgdic::!DictionaryExplorer*.
-Please initialize an *index* by using *root()* before starting prefix matching.
+These functions are provided for prefix matching.
+First, an index must be initialized by using *root()*.
+Then, the functions *Follow()* follow transitions with a given *label* or
+labels in a given string *s*.
+A function *has_value()* returns whether a current state
+has an out-transition to a terminal or not.
+Also, a function *value()* returns a value in a corresponding terminal.
 
 {{{
 // Maps memory with its size.
@@ -188,8 +190,8 @@ This function maps a given *address* to a buffer of double-array elements.
 
 == !DictionaryBuilder ==
 
-|| *Header* || nanika/dawgdic/dictionary-builder.h ||
-|| *Namespace* || nanika::dawgdic ||
+|| *Header* || dawgdic/dictionary-builder.h ||
+|| *Namespace* || dawgdic ||
 
 {{{
 // Builds a dictionary from a dawg.
@@ -199,85 +201,3 @@ static bool Build(const Dawg &dawg, Dictionary *dic, BaseType *num_of_unused_uni
 This function builds a dictionary from a *dawg*,
 and then updates *dic* and *num_of_unused_units*.
 After that, *this* object will be initialized.
-
-----
-
-== !DictionaryExplorer ==
-
-|| *Header* || nanika/dawgdic/dictionary-explorer.h ||
-|| *Namespace* || nanika::dawgdic ||
-
-{{{
-DictionaryExplorer(const Dictionary &dic);
-}}}
-
-This function initializes an object to traverse a dictionary.
-
-{{{
-// Initializes matching position.
-void Reset();
-void Reset(const Dictionary &dic);
-}}}
-
-This function moves a matching position to the root state.
-
-{{{
-// Follows a transition.
-bool Follow(CharType label);
-}}}
-
-This function follows a transition with a given *label*.
-
-{{{
-// Follows transitions.
-bool Follow(const CharType *s);
-bool Follow(const CharType *s, SizeType *count);
-bool Follow(const CharType *s, SizeType length);
-bool Follow(const CharType *s, SizeType length, SizeType *count);
-}}}
-
-This function follows transitions with labels in a given string *s* and
-returns the number of transitions successfully followed to *count*.
-
-{{{
-bool has_value() const;
-}}}
-
-This function returns whether a current state has
-an out-transition to a terminal or not.
-
-{{{
-ValueType value() const;
-}}}
-
-This function returns a value in a corresponding terminal.
-
-----
-
-== !LineReader ==
-
-|| *Header* || nanika/ios/line-reader.h ||
-|| *Namespace* || nanika::ios ||
-
-{{{
-// Creates an object to read lines from a given input stream.
-explicit LineReader(std::istream *stream, std::size_t block_size = DEFAULT_BLOCK_SIZE);
-}}}
-
-This function initializes an object to read lines
-from a given input *stream* by using an internal buffer.
-
-{{{
-// Reads a line.
-bool Read(std::string *line);
-}}}
-
-This function reads a *line* and creates a string object.
-
-{{{
-// Reads a line (this buffer will be broken by the next call).
-bool Read(const char **line, std::size_t *length = NULL);
-}}}
-
-This function reads a line and updates *line* and *length*.
-However, *line* may be unavailable after the next call.

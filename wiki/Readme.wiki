@@ -36,28 +36,26 @@ make
 make install
 }}}
 
-This process installs two commands, *make-dawgdic* and *dawgdic*,
-and headers *<nanika/ios/`*`.h>* and *<nanika/dawgdic/`*`.h>* as a C++ header library.
+This process installs two commands, *dawgdic-build* and *dawgdic-find*,
+and headers *<dawgdic/`*`.h>* as a C++ header library.
 Outline of commands and headers are given as follows:
 
  * Commands
   * *make-dawg*
    * Builds a dictionary from a lexicon.
-   * Keys must be divided by line separaters(LF).
+   * Keys must be divided by line separaters (LF).
    * Keys must be sorted in dictionary order.
   * *dawgdic*
    * Finds keys in prefixes of each input line.
  * Headers
-  * *<nanika/ios/`*`.h>*
-   * Defines a class for accelerating the speed of reading lines.
-  * *<nanika/dawgdic/`*`.h>*
+  * *<dawgdic/`*`.h>*
    * Defines classes for building a dictionary from a lexicon.
    * Defines classes for finding keys in a dictionary.
 
 === Without Installation ===
 
 If you want to use *dawgdic* on Windows or without installation.
-Please copy headers in src/nanika/dawgdic to
+Please copy headers in src/dawgdic to
 include directory or your project directory.
 
 ----
@@ -71,35 +69,35 @@ The construction process is given as follows:
  # Dawg construction
   * Builds a simple dawg from a lexicon.
    * Keys must be inserted in dictionary order or reverse dictionary order.
-   * *nanika::dawgdic::!DawgBuilder* is a class for building a simple dawg.
-   * *nanika::dawgdic::Dawg* is a simple dawg class.
+   * *dawgdic::!DawgBuilder* is a class for building a simple dawg.
+   * *dawgdic::Dawg* is a simple dawg class.
  # Dawg conversion
   * Transforms a simple dawg into a dictionary.
-   * *nanika::dawgdic::!DictionaryBuilder* is a class for building a dictionary.
-   * *nanika::dawgdic::Dictionary* is a dictionary class.
+   * *dawgdic::!DictionaryBuilder* is a class for building a dictionary.
+   * *dawgdic::Dictionary* is a dictionary class.
 
 The following sample code builds a dictionary from a lexicon
 which consists of keys "apple" and "orange" without records.
 In fact, the default value 0 is attached to the keys.
 If you want to give a record to a key other than the default value,
 please pass a record to a member function *Insert()*
-of *nanika::dawgdic::!DawgBuilder* as the 2nd or 3rd argument.
+of *dawgdic::!DawgBuilder* as the 2nd or 3rd argument.
 
 {{{
 #include <ofstream>
 
-#include <nanika/dawgdic/dawg-builder.h>
-#include <nanika/dawgdic/dictionary-builder.h>
+#include <dawgdic/dawg-builder.h>
+#include <dawgdic/dictionary-builder.h>
 
-nanika::dawgdic::DawgBuilder dawg_builder;
+dawgdic::DawgBuilder dawg_builder;
 dawg_builder.Insert("apple");
 dawg_builder.Insert("orange");
 
-nanika::dawgdic::Dawg dawg;
+dawgdic::Dawg dawg;
 dawg_builder.Finish(&dawg);
 
-nanika::dawgdic::Dictionary dic;
-nanika::dawgdic::DictionaryBuilder::Build(dawg, &dic);
+dawgdic::Dictionary dic;
+dawgdic::DictionaryBuilder::Build(dawg, &dic);
 
 // Writes a dictionary into a file "test.dic".
 std::ofstream dic_file("test.dic", ios::binary);
@@ -110,18 +108,17 @@ dic.Write(&dic_file);
 
 The following sample code gives the way of simple dictionary lookups.
 If you need to find keys in prefixes of an input string,
-please use a class *nanika::dawgdic::!DictionaryExplorer* or
-a member function *Follow()* of *nanika::dawgdic::Dictionary*.
+please use a member function *Follow()* of *dawgdic::Dictionary*.
 
 {{{
 #include <ifstream>
 #include <iostream>
 
-#include <nanika/dawgdic/dictionary.h>
+#include <dawgdic/dictionary.h>
 
 // Reads a dictionary from a file "test.dic".
 std::ifstream dic_file("test.dic", ios::binary);
-nanika::dawgdic::Dictionary dic;
+dawgdic::Dictionary dic;
 dic.Read(&dic_file);
 
 if (dic.Contains("apple"))

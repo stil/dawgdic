@@ -37,22 +37,19 @@ make
 make install
 }}}
 
-上記の方法により，2 つのコマンド *make-dawgdic* と *dawgdic* に加えて，
-C++ ヘッダライブラリとして *<nanika/ios/`*`.h>* と *<nanika/dawgdic/`*`.h>*
-がインストールされます．
+上記の方法により，2 つのコマンド *dawgdic-build* と *dawgdic-find* に加えて，
+C++ ヘッダライブラリとして *<dawgdic/`*`.h>* がインストールされます．
 各コマンドとヘッダの概要は以下の通りです．
 
  * コマンド
-  * *make-dawg*
+  * *dawgdic-build*
    * 語彙（キー集合）から辞書を構築します．
    * 入力ファイルの（LF を終端とする）各行がキーとして登録されます．
    * キーは辞書順に整列しておく必要があります．
-  * *dawgdic*
+  * *dawgdic-find*
    * 入力行の先頭に出現するキーを見つけます．
  * ヘッダ
-  * *<nanika/ios/`*`.h>*
-   * 行単位の入出力を高速化するためのクラスを提供します．
-  * *<nanika/dawgdic/`*`.h>*
+  * *<dawgdic/`*`.h>*
    * 辞書を構築するためのクラスを提供します．
    * キーを検索するためのクラスを提供します．
 
@@ -60,8 +57,7 @@ C++ ヘッダライブラリとして *<nanika/ios/`*`.h>* と *<nanika/dawgdic/
 
 Windows 環境で configure スクリプトを利用できない場合など，
 インストールをせずに *dawgdic* を使いたいときは，
-src/nanika/dawgdic 以下のヘッダをプロジェクトのディレクトリに
-直接コピーしてください．
+src/dawgdic 以下のヘッダをプロジェクトのディレクトリに直接コピーしてください．
 
 ----
 
@@ -74,34 +70,34 @@ src/nanika/dawgdic 以下のヘッダをプロジェクトのディレクトリ�
  # DAWG の構築
   * キー集合から単純な DAWG を構築します．
    * キーは辞書順に一つずつ登録します．
-   * *nanika::dawgdic::!DawgBuilder* が DAWG 構築用のクラスです．
-   * *nanika::dawgdic::Dawg* が DAWG のクラスです．
+   * *dawgdic::!DawgBuilder* が DAWG 構築用のクラスです．
+   * *dawgdic::Dawg* が DAWG のクラスです．
  # DAWG の変換
   * 単純な DAWG を辞書へと変換します．
-   * *nanika::dawgdic::!DictionaryBuilder* 辞書構築用のクラスです.
-   * *nanika::dawgdic::Dictionary* は辞書のクラスです．
+   * *dawgdic::!DictionaryBuilder* 辞書構築用のクラスです.
+   * *dawgdic::Dictionary* は辞書のクラスです．
 
 以下の例では，2 つのキー "apple" と "orange" に対する辞書を構築しています．
 キーの登録時に引数を省略するとデフォルトの値 0 がレコードとして
 割り当てられますが，必要に応じてユーザが設定することも可能です．
-その場合，*nanika::dawgdic::!DawgBuilder* のメンバ関数 *Insert()* に対し，
+その場合，*dawgdic::!DawgBuilder* のメンバ関数 *Insert()* に対し，
 第 2 引数もしくは第 3 引数として渡すことになります．
 
 {{{
 #include <ofstream>
 
-#include <nanika/dawgdic/dawg-builder.h>
-#include <nanika/dawgdic/dictionary-builder.h>
+#include <dawgdic/dawg-builder.h>
+#include <dawgdic/dictionary-builder.h>
 
-nanika::dawgdic::DawgBuilder dawg_builder;
+dawgdic::DawgBuilder dawg_builder;
 dawg_builder.Insert("apple");
 dawg_builder.Insert("orange");
 
-nanika::dawgdic::Dawg dawg;
+dawgdic::Dawg dawg;
 dawg_builder.Finish(&dawg);
 
-nanika::dawgdic::Dictionary dic;
-nanika::dawgdic::DictionaryBuilder::Build(dawg, &dic);
+dawgdic::Dictionary dic;
+dawgdic::DictionaryBuilder::Build(dawg, &dic);
 
 // 辞書をファイル "test.dic" に書き出す．
 std::ofstream dic_file("test.dic", ios::binary);
@@ -112,18 +108,17 @@ dic.Write(&dic_file);
 
 以下の例では，辞書からキーを検索しています．
 前方一致検索をおこなう場合は，
-*nanika::dawgdic::!DictionaryExplorer* を用いるか，
-*nanika::dawgdic::Dictionary* のメンバ関数 *Follow()* を利用してください．
+*dawgdic::Dictionary* のメンバ関数 *Follow()* を利用してください．
 
 {{{
 #include <ifstream>
 #include <iostream>
 
-#include <nanika/dawgdic/dictionary.h>
+#include <dawgdic/dictionary.h>
 
 // 辞書をファイル "test.dic" から読み込む．
 std::ifstream dic_file("test.dic", ios::binary);
-nanika::dawgdic::Dictionary dic;
+dawgdic::Dictionary dic;
 dic.Read(&dic_file);
 
 if (dic.Contains("apple"))

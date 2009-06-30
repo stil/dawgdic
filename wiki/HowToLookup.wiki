@@ -7,10 +7,10 @@
 The following example gives a function to lookup a key in a dictionary.
 
 {{{
-#include <nanika/dawgdic/dictionary.h>
+#include <dawgdic/dictionary.h>
 
 // Lookups a key in a dictionary.
-void Lookup(const nanika::dawgdic::Dictionary &dic, const char *key) {
+void Lookup(const dawgdic::Dictionary &dic, const char *key) {
 
   // Checks whether a dictionary contains a given key or not.
   if (dic.Contains(key))
@@ -36,27 +36,26 @@ all occurrences of keys in text.
 {{{
 #include <string>
 
-#include <nanika/dawgdic/dictionary.h>
-#include <nanika/dawgdic/dictionary-explorer.h>
+#include <dawgdic/dictionary.h>
+#include <dawgdic/dictionary-explorer.h>
 
 // Finds all the keys in a given text.
-void Filter(const nanika::dawgdic::Dictionary &dic, const char *text) {
+void Filter(const dawgdic::Dictionary &dic, const char *text) {
 
-  nanika::dawgdic::DictionaryExplorer explorer(dic);
   for (const char *p = text; *p != '\0'; ++p) {
 
     // Begins prefix matching at each position in a text.
-    explorer.Reset();
+    BaseType index = dic.root();
     for (const char *q = p; *q != '\0'; ++q) {
 
       // Follows a transition one by one.
-      if (!explorer.Follow(*q))
+      if (!dic.Follow(*q, &index))
         break;
 
       // Outputs information of a matched key.
-      if (explorer.has_value())
+      if (dic.has_value(index))
         std::cout << '(' << (p - text) << ", " << (q + 1 - p) << ", "
-                  << explorer.value() << "): "
+                  << dic.value(index) << "): "
                   << std::string(p, q + 1 - p) << std::endl;
     }
   }

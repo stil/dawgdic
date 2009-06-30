@@ -11,15 +11,15 @@
 #include <iostream>
 #include <string>
 
-#include <nanika/dawgdic/dawg-builder.h>
-#include <nanika/dawgdic/dictionary-builder.h>
+#include <dawgdic/dawg-builder.h>
+#include <dawgdic/dictionary-builder.h>
 
 // 整列済みの語彙を入力ストリーム "lexicon_input" から読み出し，
 // 辞書を構築して "dic_output" へと書き出す．
 bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
 
   // 語彙は辞書式昇順に整列されている必要がある．
-  nanika::dawgdic::DawgBuilder dawg_builder;
+  dawgdic::DawgBuilder dawg_builder;
   std::string key;
   while (std::getline(*lexicon_input, key)) {
 
@@ -42,12 +42,12 @@ bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
   }
 
   // DAWG の構築を終了し，構築用のオブジェクトを初期化する．
-  nanika::dawgdic::Dawg dawg;
+  dawgdic::Dawg dawg;
   dawg_builder.Finish(&dawg);
 
   // DAWG から辞書を構築する．
-  nanika::dawgdic::Dictionary dic;
-  if (!nanika::dawgdic::DictionaryBuilder::Build(dawg, &dic))
+  dawgdic::Dictionary dic;
+  if (!dawgdic::DictionaryBuilder::Build(dawg, &dic))
     return false;
 
   // 辞書を出力ストリームに書き出す．

@@ -7,19 +7,17 @@
 ライブラリ *dawgdic* の提供する主なクラスを以下に示す．
 
 || *Header* || *Namespace* || *Class* ||
-|| nanika/dawgdic/dawg.h || nanika::dawgdic || Dawg ||
-|| nanika/dawgdic/dawg-builder.h || nanika::dawgdic || !DawgBuilder ||
-|| nanika/dawgdic/dictionary.h || nanika::dawgdic || Dictionary ||
-|| nanika/dawgdic/dictionary-builder.h || nanika::dawgdic || !DictionaryBuilder ||
-|| nanika/dawgdic/dictionary-explorer.h || nanika::dawgdic || !DictionaryExplorer ||
-|| nanika/ios/line-reader.h || nanika::ios || !LineReader ||
+|| dawgdic/dawg.h || dawgdic || Dawg ||
+|| dawgdic/dawg-builder.h || dawgdic || !DawgBuilder ||
+|| dawgdic/dictionary.h || dawgdic || Dictionary ||
+|| dawgdic/dictionary-builder.h || dawgdic || !DictionaryBuilder ||
 
 ----
 
 == Dawg ==
 
-|| *Header* || nanika/dawgdic/dawg.h ||
-|| *Namespace* || nanika::dawgdic ||
+|| *Header* || dawgdic/dawg.h ||
+|| *Namespace* || dawgdic ||
 
 {{{
 // 遷移数．
@@ -47,8 +45,8 @@ DAWG の構築において併合された状態の数を返す．
 
 == !DawgBuilder ==
 
-|| *Header* || nanika/dawgdic/dawg-builder.h ||
-|| *Namespace* || nanika::dawgdic ||
+|| *Header* || dawgdic/dawg-builder.h ||
+|| *Namespace* || dawgdic ||
 
 {{{
 // 遷移数．
@@ -95,8 +93,8 @@ DAWG の構築を終了し，完成した DAWG を *dawg* に渡す．
 
 == Dictionary ==
 
-|| *Header* || nanika/dawgdic/dictionary.h ||
-|| *Namespace* || nanika::dawgdic ||
+|| *Header* || dawgdic/dictionary.h ||
+|| *Namespace* || dawgdic ||
 
 {{{
 const DictionaryUnit *units() const;
@@ -163,9 +161,11 @@ bool Follow(const CharType *s, SizeType length, BaseType *index);
 bool Follow(const CharType *s, SizeType length, BaseType *index, SizeType *count);
 }}}
 
-前方一致検索をおこなうための関数であり，
-*nanika::dawgdic::!DictionaryExplorer* と同様の使い方をする．
-ただし，探索位置 *index* は関数 *root()* により初期化する必要がある．
+前方一致検索をおこなうためのインタフェースであり，
+関数 *root()* により探索開始位置を取得した後，
+関数 *Follow()* によって文字あるいは文字列に対応する遷移を辿る．
+探索位置から終端への遷移があるかどうかは関数 *has_value()* により確認できる．
+また，終端への遷移がある場合，関数 *value()* によりレコードを取得できる．
 
 {{{
 // 任意の領域を配列に割り当てる．
@@ -186,92 +186,15 @@ void Map(const void *address, SizeType size);
 
 == !DictionaryBuilder ==
 
-|| *Header* || nanika/dawgdic/dictionary-builder.h ||
-|| *Namespace* || nanika::dawgdic ||
+|| *Header* || dawgdic/dictionary-builder.h ||
+|| *Namespace* || dawgdic ||
 
 {{{
 // DAWG から辞書を構築する．
 static bool Build(const Dawg &dawg, Dictionary *dic, BaseType *num_of_unused_units = NULL);
 }}}
 
-*nanika::dawgdic::!DawgBuilder* により構築した *dawg* から辞書を構築し，
+*dawgdic::!DawgBuilder* により構築した *dawg* から辞書を構築し，
 *dic* を新しい辞書に置き換えるとともに，
 未使用の要素数を *num_of_unused_units* に代入する．
 なお，オブジェクト *this* は初期化される．
-
-----
-
-== !DictionaryExplorer ==
-
-|| *Header* || nanika/dawgdic/dictionary-explorer.h ||
-|| *Namespace* || nanika::dawgdic ||
-
-{{{
-DictionaryExplorer(const Dictionary &dic);
-}}}
-
-辞書 *dic* を探索するためのオブジェクトを初期化する．
-
-{{{
-void Reset();
-void Reset(const Dictionary &dic);
-}}}
-
-探索位置を初期化する．
-
-{{{
-bool Follow(CharType label);
-}}}
-
-指定されたラベル *label* を持つ遷移を辿る．
-
-{{{
-bool Follow(const CharType *s);
-bool Follow(const CharType *s, SizeType *count);
-bool Follow(const CharType *s, SizeType length);
-bool Follow(const CharType *s, SizeType length, SizeType *count);
-}}}
-
-指定された文字列 *s* を構成するラベルを持つ遷移を辿り，
-遷移に成功した回数を *count* に代入する．
-
-{{{
-bool has_value() const;
-}}}
-
-探索位置から終端への遷移が存在するかどうかを返す．
-
-{{{
-ValueType value() const;
-}}}
-
-探索位置から終端への遷移が存在するとき，
-その終端に格納されているレコードを返す．
-
-----
-
-== !LineReader ==
-
-|| *Header* || nanika/ios/line-reader.h ||
-|| *Namespace* || nanika::ios ||
-
-{{{
-explicit LineReader(std::istream *stream, std::size_t block_size = DEFAULT_BLOCK_SIZE);
-}}}
-
-入力ストリーム *stream* からの行読み込みを
-バッファリングにより高速化するためのオブジェクトを初期化する．
-
-{{{
-bool Read(std::string *line);
-}}}
-
-行を読み込み，*line* に格納する．
-
-{{{
-// Reads a line (this buffer will be broken by the next call).
-bool Read(const char **line, std::size_t *length = NULL);
-}}}
-
-行を読み込み，開始位置を *line* に格納し，長さを *length* に格納する．
-ただし，次の読み込みとともに，*line* の内容は破壊される．
