@@ -18,26 +18,17 @@ public:
 		DEFAULT_INITIAL_HASH_TABLE_SIZE)
 		: initial_hash_table_size_(initial_hash_table_size),
 		base_pool_(), label_pool_(), flag_pool_(), unit_pool_(),
-		hash_table_(), unfixed_units_(), unused_units_(), num_of_states_(1),
-		num_of_merged_transitions_(0), num_of_merging_states_(0) {}
+		hash_table_(), unfixed_units_(), unused_units_(), num_of_states_(0),
+		num_of_merged_states_(0), num_of_merging_states_(0) {}
 
-	// Number of units.
+	// Number of fixed transitions.
 	SizeType size() const { return base_pool_.size(); }
 	// Number of transitions.
-	SizeType num_of_transitions() const { return base_pool_.size() - 1; }
+	SizeType num_of_transitions() const { return base_pool_.size(); }
 	// Number of states.
 	SizeType num_of_states() const { return num_of_states_; }
-	// Number of merged transitions.
-	SizeType num_of_merged_transitions() const
-	{
-		return num_of_merged_transitions_;
-	}
 	// Number of merged states.
-	SizeType num_of_merged_states() const
-	{
-		return num_of_transitions()
-			+ num_of_merged_transitions() + 1 - num_of_states();
-	}
+	SizeType num_of_merged_states() const { return num_of_merged_states_; }
 	// Number of merging states.
 	SizeType num_of_merging_states() const { return num_of_merging_states_; }
 
@@ -54,8 +45,8 @@ public:
 		while (!unused_units_.empty())
 			unused_units_.pop();
 
-		num_of_states_ = 1;
-		num_of_merged_transitions_ = 0;
+		num_of_states_ = 0;
+		num_of_merged_states_ = 0;
 		num_of_merging_states_ = 0;
 	}
 
@@ -137,8 +128,7 @@ public:
 		label_pool_[0] = unit_pool_[0].label();
 
 		dawg->set_num_of_states(num_of_states_);
-		dawg->set_num_of_merged_transitions(num_of_merged_transitions_);
-		dawg->set_num_of_merged_states(num_of_merged_states());
+		dawg->set_num_of_merged_states(num_of_merged_states_);
 		dawg->set_num_of_merging_states(num_of_merging_states_);
 
 		dawg->SwapBasePool(&base_pool_);
@@ -161,7 +151,7 @@ private:
 	std::stack<BaseType> unfixed_units_;
 	std::stack<BaseType> unused_units_;
 	SizeType num_of_states_;
-	SizeType num_of_merged_transitions_;
+	SizeType num_of_merged_states_;
 	SizeType num_of_merging_states_;
 
 	// Disallows copies.
@@ -192,15 +182,14 @@ private:
 				ExpandHashTable();
 
 			BaseType num_of_siblings = 0;
-			for (BaseType i = unfixed_index; i != 0;
-				i = unit_pool_[i].sibling())
+			for (BaseType i = unfixed_index; i; i = unit_pool_[i].sibling())
 				++num_of_siblings;
 
 			BaseType hash_id;
 			BaseType matched_index = FindUnit(unfixed_index, &hash_id);
 			if (matched_index != 0)
 			{
-				num_of_merged_transitions_ += num_of_siblings;
+				num_of_merged_states_ += num_of_siblings;
 
 				// Records a merging state.
 				if (flag_pool_.get(matched_index) == false)
