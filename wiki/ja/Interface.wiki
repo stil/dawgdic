@@ -20,26 +20,21 @@
 || *Namespace* || dawgdic ||
 
 {{{
-// 遷移数．
+// 遷移数と状態数．
 SizeType size() const;
 SizeType num_of_transitions() const;
-}}}
-
-DAWG を構成する遷移の数を返す．
-
-{{{
-// 状態数．
 SizeType num_of_states() const;
 }}}
 
-DAWG を構成する状態の数を返す．
+DAWG を構成する遷移および状態の数を返す．
 
 {{{
-// 併合された状態の数．
+// 併合された遷移および状態の数．
+SizeType num_of_merged_transitions() const;
 SizeType num_of_merged_states() const;
 }}}
 
-DAWG の構築において併合された状態の数を返す．
+DAWG の構築において併合された遷移および状態の数を返す．
 
 ----
 

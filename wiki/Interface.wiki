@@ -20,26 +20,22 @@ The main classes of this library are given as follows:
 || *Namespace* || dawgdic ||
 
 {{{
-// Number of transitions.
+// Numbers of transitions and states.
 SizeType size() const;
 SizeType num_of_transitions() const;
-}}}
-
-These functions return the number of transitions in a dawg.
-
-{{{
-// Number of states.
 SizeType num_of_states() const;
 }}}
 
-This function returns the number of states in a dawg.
+These functions return the number of transitions or states in a dawg.
 
 {{{
-// Number of merged states.
+// Numbers of merged transitions and states.
+SizeType num_of_merged_transitions() const;
 SizeType num_of_merged_states() const;
 }}}
 
-This function returns the number of states merged in building a dawg.
+These functions return the number of transitions or states merged
+in building a dawg.
 
 ----
 
@@ -49,26 +45,22 @@ This function returns the number of states merged in building a dawg.
 || *Namespace* || dawgdic ||
 
 {{{
-// Number of transitions.
+// Numbers of transitions and states.
 SizeType size() const;
 SizeType num_of_transitions() const;
-}}}
-
-These functions return the number of transitions in a building dawg.
-
-{{{
-// Number of states.
 SizeType num_of_states() const;
 }}}
 
-This function returns the number of states in a building dawg.
+These functions return the number of transitions or states in a dawg.
 
 {{{
-// Number of merged states.
+// Numbers of merged transitions and states.
+SizeType num_of_merged_transitions() const;
 SizeType num_of_merged_states() const;
 }}}
 
-This function returns the number of states merged in building a dawg.
+These functions return the number of transitions or states merged
+in building a dawg.
 
 {{{
 // Inserts a key into a dawg.

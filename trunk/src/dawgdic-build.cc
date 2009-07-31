@@ -45,6 +45,8 @@ bool BuildDictionary(const char *lexicon_file_name, dawgdic::Dictionary *dic)
 		<< dawg.num_of_merged_states() << std::endl;
 	std::cerr << "no. merging states: "
 		<< dawg.num_of_merging_states() << std::endl;
+	std::cerr << "no. merged transitions: "
+		<< dawg.num_of_merged_transitions() << std::endl;
 
 	// Builds a dictionary from a dawg.
 	dawgdic::BaseType num_of_unused_units;
