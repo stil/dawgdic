@@ -10,24 +10,17 @@ namespace dawgdic {
 class Dawg
 {
 public:
-	Dawg() : base_pool_(), label_pool_(), flag_pool_(),
-		num_of_states_(0), num_of_merged_transitions_(0),
+	Dawg() : base_pool_(), label_pool_(), flag_pool_(), num_of_states_(0),
 		num_of_merged_states_(0), num_of_merging_states_(0) {}
 
 	// The root index.
 	BaseType root() const { return 0; }
 
-	// Number of units.
+	// Number of fixed transitions.
 	SizeType size() const { return base_pool_.size(); }
-	// Number of transitions.
-	SizeType num_of_transitions() const { return base_pool_.size() - 1; }
+	SizeType num_of_transitions() const { return base_pool_.size(); }
 	// Number of states.
 	SizeType num_of_states() const { return num_of_states_; }
-	// Number of merged transitions.
-	SizeType num_of_merged_transitions() const
-	{
-		return num_of_merged_transitions_;
-	}
 	// Number of merged states.
 	SizeType num_of_merged_states() const { return num_of_merged_states_; }
 	// Number of merging states.
@@ -63,11 +56,6 @@ public:
 	{
 		num_of_states_ = num_of_states;
 	}
-	// Sets the number of merged transitions.
-	void set_num_of_merged_transitions(SizeType num_of_merged_transitions)
-	{
-		num_of_merged_transitions_ = num_of_merged_transitions;
-	}
 	// Sets the number of merged states.
 	void set_num_of_merged_states(SizeType num_of_merged_states)
 	{
@@ -100,7 +88,6 @@ private:
 	ObjectPool<UCharType> label_pool_;
 	BitPool<> flag_pool_;
 	SizeType num_of_states_;
-	SizeType num_of_merged_transitions_;
 	SizeType num_of_merged_states_;
 	SizeType num_of_merging_states_;
 
