@@ -1,28 +1,100 @@
 #include "dawgdic/dawg-builder.h"
 #include "dawgdic/dictionary-builder.h"
+#include "dawgdic/guide-builder.h"
 
 #include <fstream>
 #include <iostream>
+#include <string>
 
-// Builds a dictionary from a sorted lexicon.
-bool BuildDictionary(const char *lexicon_file_name, dawgdic::Dictionary *dic)
+namespace {
+
+class CommandOptions
 {
-	std::cerr << "input: " << lexicon_file_name << std::endl;
+public:
+	CommandOptions() : help_(false), guide_(false),
+		lexicon_file_name_(), dic_file_name_() {}
 
-	// Opens an input file.
-	std::ifstream lexicon_file(lexicon_file_name, std::ios::binary);
-	if (!lexicon_file.is_open())
+	// Reads options.
+	bool help() const { return help_; }
+	bool guide() const { return guide_; }
+	const std::string &lexicon_file_name() const
 	{
-		std::cerr << "error: failed to open file: "
-			<< lexicon_file_name << std::endl;
-		return false;
+		return lexicon_file_name_;
+	}
+	const std::string &dic_file_name() const { return dic_file_name_; }
+
+	bool Parse(int argc, char *argv[])
+	{
+		for (int i = 1; i < argc; ++i)
+		{
+			// Parses options.
+			if (argv[i][0] == '-' && argv[i][1] != '\0')
+			{
+				for (int j = 1; argv[i][j] != '\0'; ++j)
+				{
+					switch (argv[i][j])
+					{
+					case 'h':
+						help_ = true;
+						break;
+					case 'g':
+						guide_ = true;
+						break;
+					default:
+						// Invalid option.
+						return false;
+					}
+				}
+			}
+			else if (lexicon_file_name_.empty())
+				lexicon_file_name_ = argv[i];
+			else if (dic_file_name_.empty())
+				dic_file_name_ = argv[i];
+			else
+			{
+				// Too many arguments.
+				return false;
+			}
+		}
+
+		// Uses default settings for file names.
+		if (lexicon_file_name_.empty())
+			lexicon_file_name_ = "-";
+		if (dic_file_name_.empty())
+			dic_file_name_ = "-";
+		return true;
 	}
 
-	// Reads keys and inserts them into a dawg.
+	static void ShowUsage(std::ostream *output)
+	{
+		*output << "Usage: - [Options] [LexiconFile] [DicFile]\n"
+			"\n"
+			"Options:\n"
+			"  -h  display this help and exit\n"
+			"  -g  build dictionary with guide\n";
+		*output << std::endl;
+	}
+
+private:
+	bool help_;
+	bool guide_;
+	std::string lexicon_file_name_;
+	std::string dic_file_name_;
+
+	// Disallows copies.
+	CommandOptions(const CommandOptions &);
+	CommandOptions &operator=(const CommandOptions &);
+};
+
+// Builds a dawg from a sorted lexicon.
+bool BuildDawg(std::istream *lexicon_stream, dawgdic::Dawg *dawg)
+{
 	dawgdic::DawgBuilder dawg_builder;
+
+	// Reads keys from an input stream and inserts them into a dawg.
 	std::string key;
 	std::size_t key_count = 0;
-	while (std::getline(lexicon_file, key))
+	while (std::getline(*lexicon_stream, key))
 	{
 		if (!dawg_builder.Insert(key.c_str()))
 		{
@@ -33,26 +105,31 @@ bool BuildDictionary(const char *lexicon_file_name, dawgdic::Dictionary *dic)
 		if (++key_count % 10000 == 0)
 			std::cerr << "no. keys: " << key_count << '\r';
 	}
-	dawgdic::Dawg dawg;
-	dawg_builder.Finish(&dawg);
+
+	dawg_builder.Finish(dawg);
 
 	std::cerr << "no. keys: " << key_count << std::endl;
 	std::cerr << "no. states: "
-		<< dawg.num_of_states() << std::endl;
+		<< dawg->num_of_states() << std::endl;
 	std::cerr << "no. transitions: "
-		<< dawg.num_of_transitions() << std::endl;
+		<< dawg->num_of_transitions() << std::endl;
 	std::cerr << "no. merged states: "
-		<< dawg.num_of_merged_states() << std::endl;
+		<< dawg->num_of_merged_states() << std::endl;
 	std::cerr << "no. merging states: "
-		<< dawg.num_of_merging_states() << std::endl;
+		<< dawg->num_of_merging_states() << std::endl;
 	std::cerr << "no. merged transitions: "
-		<< dawg.num_of_merged_transitions() << std::endl;
+		<< dawg->num_of_merged_transitions() << std::endl;
 
-	// Builds a dictionary from a dawg.
-	dawgdic::BaseType num_of_unused_units;
+	return true;
+}
+
+// Builds a dictionary from a dawg.
+bool BuildDictionary(const dawgdic::Dawg &dawg, dawgdic::Dictionary *dic)
+{
+	dawgdic::BaseType num_of_unused_units = 0;
 	if (!dawgdic::DictionaryBuilder::Build(dawg, dic, &num_of_unused_units))
 	{
-		std::cerr << "error: failed to build dictionary" << std::endl;
+		std::cerr << "error: failed to build Dictionary" << std::endl;
 		return false;
 	}
 	double unused_ratio = 100.0 * num_of_unused_units / dic->size();
@@ -65,50 +142,97 @@ bool BuildDictionary(const char *lexicon_file_name, dawgdic::Dictionary *dic)
 	return true;
 }
 
-// Writes a dictionary to a file.
-bool SaveDictionary(const dawgdic::Dictionary &dic,
-	const char *dic_file_name)
+// Builds a guide from a dawg and its dictionary.
+bool BuildGuide(const dawgdic::Dawg &dawg,
+	const dawgdic::Dictionary &dic, dawgdic::Guide *guide)
 {
-	std::cerr << "output: " << dic_file_name << std::endl;
-
-	// Creates an output file.
-	std::ofstream dic_file(dic_file_name, std::ios::binary);
-	if (!dic_file.is_open())
+	if (!dawgdic::GuideBuilder::Build(dawg, dic, guide))
 	{
-		std::cerr << "error: failed to open file: "
-			<< dic_file_name << std::endl;
+		std::cerr << "failed to build Guide" << std::endl;
 		return false;
 	}
 
-	if (!dic.Write(&dic_file))
-	{
-		std::cerr << "error: failed to write dictionary to file: "
-			<< dic_file_name << std::endl;
-		return false;
-	}
+	std::cerr << "no. units: " << guide->size() << std::endl;
+	std::cerr << "guide size: " << guide->total_size() << std::endl;
 
 	return true;
 }
 
+}  // namespace
+
 int main(int argc, char *argv[])
 {
-	// Checks arguments.
-	if (argc != 3)
+	CommandOptions options;
+	if (!options.Parse(argc, argv))
 	{
-		std::cerr << "Usage: " << argv[0]
-			<< " LexiconFile DicFile" << std::endl;
+		CommandOptions::ShowUsage(&std::cerr);
+		return 1;
+	}
+	else if (options.help())
+	{
+		CommandOptions::ShowUsage(&std::cerr);
+		return 0;
+	}
+
+	const std::string &lexicon_file_name = options.lexicon_file_name();
+	const std::string &dic_file_name = options.dic_file_name();
+
+	std::istream *lexicon_stream = &std::cin;
+	std::ostream *dic_stream = &std::cout;
+
+	// Opens a lexicon file.
+	std::ifstream lexicon_file;
+	if (lexicon_file_name != "-")
+	{
+		lexicon_file.open(lexicon_file_name.c_str(), std::ios::binary);
+		if (!lexicon_file)
+		{
+			std::cerr << "error: failed to open LexiconFile: "
+				<< lexicon_file_name << std::endl;
+			return 1;
+		}
+		lexicon_stream = &lexicon_file;
+	}
+
+	// Opens a dictionary file.
+	std::ofstream dic_file;
+	if (dic_file_name != "-")
+	{
+		dic_file.open(dic_file_name.c_str(), std::ios::binary);
+		if (!dic_file)
+		{
+			std::cerr << "error: failed to open DicFile: "
+				<< dic_file_name << std::endl;
+			return 1;
+		}
+		dic_stream = &dic_file;
+	}
+
+	dawgdic::Dawg dawg;
+	if (!BuildDawg(lexicon_stream, &dawg))
+		return 1;
+
+	dawgdic::Dictionary dic;
+	if (!BuildDictionary(dawg, &dic))
+		return 1;
+
+	if (!dic.Write(dic_stream))
+	{
+		std::cerr << "error: failed to write Dictionary" << std::endl;
 		return 1;
 	}
 
-	const char *lexicon_file_name = argv[1];
-	const char *dic_file_name = argv[2];
-
-	dawgdic::Dictionary dic;
-	if (!BuildDictionary(lexicon_file_name, &dic))
-		return 1;
-
-	if (!SaveDictionary(dic, dic_file_name))
-		return 1;
+	if (options.guide())
+	{
+		dawgdic::Guide guide;
+		if (!BuildGuide(dawg, dic, &guide))
+			return 1;
+		if (!guide.Write(dic_stream))
+		{
+			std::cerr << "error: failed to write Guide" << std::endl;
+			return 1;
+		}
+	}
 
 	return 0;
 }

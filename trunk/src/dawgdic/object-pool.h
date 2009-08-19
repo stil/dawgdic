@@ -7,7 +7,7 @@
 
 namespace dawgdic {
 
-// This class reduces the cost of memory management for many small objects.
+// This class works like an array of objects with compact memory management.
 template <typename OBJECT_TYPE, SizeType BLOCK_SIZE = 1 << 10>
 class ObjectPool
 {

@@ -5,7 +5,7 @@
 
 namespace dawgdic {
 
-// This class reduces the cost of memory management for bit flags.
+// This class works as an array of bit flags with compact memory management.
 template <SizeType BLOCK_SIZE = 1 << 10>
 class BitPool
 {
