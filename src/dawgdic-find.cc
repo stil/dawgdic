@@ -1,3 +1,4 @@
+#include "dawgdic/completer.h"
 #include "dawgdic/dictionary.h"
 
 #include <fstream>
@@ -5,40 +6,94 @@
 #include <string>
 #include <vector>
 
-// Loads a dictionary file.
-bool LoadDictionary(const char *dic_file_name, dawgdic::Dictionary *dic)
+namespace {
+
+class CommandOptions
 {
-	std::cerr << "input: " << dic_file_name << std::endl;
+public:
+	CommandOptions() : help_(false), guide_(false),
+		dic_file_name_(), lexicon_file_name_() {}
 
-	// Opens an input file.
-	std::ifstream dic_file(dic_file_name, std::ios::binary);
-	if (!dic_file.is_open())
+	// Reads options.
+	bool help() const { return help_; }
+	bool guide() const { return guide_; }
+	const std::string &dic_file_name() const { return dic_file_name_; }
+	const std::string &lexicon_file_name() const
 	{
-		std::cerr << "error: failed to open file: "
-			<< dic_file_name << std::endl;
-		return false;
+		return lexicon_file_name_;
 	}
 
-	if (!dic->Read(&dic_file))
+	bool Parse(int argc, char *argv[])
 	{
-		std::cerr << "error: failed to read dictionary from file: "
-			<< dic_file_name << std::endl;
-		return false;
+		for (int i = 1; i < argc; ++i)
+		{
+			// Parses options.
+			if (argv[i][0] == '-' && argv[i][1] != '\0')
+			{
+				for (int j = 1; argv[i][j] != '\0'; ++j)
+				{
+					switch (argv[i][j])
+					{
+					case 'h':
+						help_ = true;
+						break;
+					case 'g':
+						guide_ = true;
+						break;
+					default:
+						// Invalid option.
+						return false;
+					}
+				}
+			}
+			else if (dic_file_name_.empty())
+				dic_file_name_ = argv[i];
+			else if (lexicon_file_name_.empty())
+				lexicon_file_name_ = argv[i];
+			else
+			{
+				// Too many arguments.
+				return false;
+			}
+		}
+
+		// Uses default settings for file names.
+		if (dic_file_name_.empty())
+			dic_file_name_ = "-";
+		if (lexicon_file_name_.empty())
+			lexicon_file_name_ = "-";
+		return true;
 	}
 
-	return true;
-}
+	static void ShowUsage(std::ostream *output)
+	{
+		*output << "Usage: - [Options] [DicFile] [LexiconFile]\n"
+			"\n"
+			"Options:\n"
+			"  -h  display this help and exit\n"
+			"  -g  load dictionary with guide\n";
+		*output << std::endl;
+	}
+
+private:
+	bool help_;
+	bool guide_;
+	std::string dic_file_name_;
+	std::string lexicon_file_name_;
+
+	// Disallows copies.
+	CommandOptions(const CommandOptions &);
+	CommandOptions &operator=(const CommandOptions &);
+};
 
 // Example of finding prefix keys from each line of an input text.
-// There are two ways to perform prefix matching.
-// One uses dawgdic::DictionaryExplorer,
-// and the other uses only dawgdic::Dictionary.
-bool FindKeys(const dawgdic::Dictionary &dic, std::istream *input)
+void FindPrefixKeys(const dawgdic::Dictionary &dic, std::istream *input)
 {
-	std::vector<std::size_t> lengths;
 	std::string line;
 	while (std::getline(*input, line))
 	{
+		std::cout << line << ':';
+
 		dawgdic::BaseType index = dic.root();
 		for (std::size_t i = 0; i < line.length(); ++i)
 		{
@@ -47,39 +102,109 @@ bool FindKeys(const dawgdic::Dictionary &dic, std::istream *input)
 
 			// Reads a value.
 			if (dic.has_value(index))
-				lengths.push_back(i + 1);
+			{
+				std::cout << ' ';
+				std::cout.write(line.c_str(), i + 1);
+				std::cout << " = " << dic.value(index) << ';';
+			}
 		}
-
-		if (lengths.empty())
-			std::cout << line << ": not found" << std::endl;
-		else
-		{
-			std::cout << line << ": found, num = " << lengths.size() << ',';
-			for (std::size_t i = 0; i < lengths.size(); ++i)
-				std::cout << ' ' << lengths[i];
-			std::cout << std::endl;
-		}
-		lengths.clear();
+		std::cout << std::endl;
 	}
-
-	return true;
 }
+
+// Example of completing keys from each line of an input text.
+void CompleteKeys(const dawgdic::Dictionary &dic,
+	const dawgdic::Guide &guide, std::istream *input)
+{
+	dawgdic::Completer completer(dic, guide);
+	std::string line;
+	while (std::getline(*input, line))
+	{
+		std::cout << line << ':';
+
+		dawgdic::BaseType index = dic.root();
+		if (dic.Follow(line.c_str(), line.length(), &index))
+		{
+			completer.Start(index);
+			while (completer.Next())
+			{
+				std::cout << ' ' << line << completer.key()
+					<< " = " << completer.value();
+			}
+		}
+		std::cout << std::endl;
+	}
+}
+
+}  // namespace
 
 int main(int argc, char *argv[])
 {
-	if (argc != 2)
+	CommandOptions options;
+	if (!options.Parse(argc, argv))
 	{
-		std::cerr << "Usage: " << argv[0] << " DicFile" << std::endl;
+		CommandOptions::ShowUsage(&std::cerr);
+		return 1;
+	}
+	else if (options.help())
+	{
+		CommandOptions::ShowUsage(&std::cerr);
+		return 0;
+	}
+
+	const std::string &dic_file_name = options.dic_file_name();
+	const std::string &lexicon_file_name = options.lexicon_file_name();
+
+	std::istream *dic_stream = &std::cin;
+	std::istream *lexicon_stream = &std::cin;
+
+	// Opens a dictionary file.
+	std::ifstream dic_file;
+	if (dic_file_name != "-")
+	{
+		dic_file.open(dic_file_name.c_str(), std::ios::binary);
+		if (!dic_file)
+		{
+			std::cerr << "error: failed to open DicFile: "
+				<< dic_file_name << std::endl;
+			return 1;
+		}
+		dic_stream = &dic_file;
+	}
+
+	// Opens a lexicon file.
+	std::ifstream lexicon_file;
+	if (lexicon_file_name != "-")
+	{
+		lexicon_file.open(lexicon_file_name.c_str(), std::ios::binary);
+		if (!lexicon_file)
+		{
+			std::cerr << "error: failed to open LexiconFile: "
+				<< lexicon_file_name << std::endl;
+			return 1;
+		}
+		lexicon_stream = &lexicon_file;
+	}
+
+	dawgdic::Dictionary dic;
+	if (!dic.Read(dic_stream))
+	{
+		std::cerr << "error: failed to read Dictionary" << std::endl;
 		return 1;
 	}
 
-	const char *dic_file_name = argv[1];
-
-	dawgdic::Dictionary dic;
-	if (!LoadDictionary(dic_file_name, &dic))
-		return 1;
-
-	FindKeys(dic, &std::cin);
+	if (!options.guide())
+		FindPrefixKeys(dic, lexicon_stream);
+	else
+	{
+		dawgdic::Guide guide;
+		if (!guide.Read(dic_stream))
+		{
+			std::cerr << "error: failed to read Guide" << std::endl;
+			return 1;
+		}
+		CompleteKeys(dic, guide, lexicon_stream);
+	}
 
 	return 0;
 }

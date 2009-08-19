@@ -55,6 +55,18 @@ public:
 		num_of_merged_states_ = 0;
 	}
 
+	// Swaps dawgs.
+	void Swap(Dawg *dawg)
+	{
+		base_pool_.Swap(&dawg->base_pool_);
+		label_pool_.Swap(&dawg->label_pool_);
+		flag_pool_.Swap(&dawg->flag_pool_);
+		std::swap(num_of_states_, dawg->num_of_states_);
+		std::swap(num_of_merged_transitions_, dawg->num_of_merged_transitions_);
+		std::swap(num_of_merged_states_, dawg->num_of_merged_states_);
+		std::swap(num_of_merging_states_, dawg->num_of_merging_states_);
+	}
+
 public:
 	// Following member functions are called from DawgBuilder.
 
