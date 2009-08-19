@@ -91,11 +91,15 @@ private:
 		units(0).set_offset(1);
 		units(0).set_label('\0');
 
-		if (dawg_.size() > 1 && !BuildDictionary(dawg_.root(), 0))
-			return false;
+		if (dawg_.size() > 1)
+		{
+			if (!BuildDictionary(dawg_.root(), 0))
+				return false;
+		}
+
 		FixAllBlocks();
 
-		Dictionary(&units_).Swap(dic_);
+		dic_->SwapUnitsBuf(&units_);
 		return true;
 	}
 
@@ -125,7 +129,7 @@ private:
 
 		// Finds a good offset and arranges child nodes.
 		BaseType offset = ArrangeChildNodes(dawg_index, dic_index);
-		if (!offset)
+		if (offset == 0)
 			return false;
 
 		if (dawg_.is_merging(dawg_child_index))
@@ -138,7 +142,7 @@ private:
 			if (!BuildDictionary(dawg_child_index, dic_child_index))
 				return false;
 			dawg_child_index = dawg_.sibling(dawg_child_index);
-		} while (dawg_child_index);
+		} while (dawg_child_index != 0);
 
 		return true;
 	}
@@ -149,7 +153,7 @@ private:
 		labels_.clear();
 
 		BaseType dawg_child_index = dawg_.child(dawg_index);
-		while (dawg_child_index)
+		while (dawg_child_index != 0)
 		{
 			labels_.push_back(dawg_.label(dawg_child_index));
 			dawg_child_index = dawg_.sibling(dawg_child_index);

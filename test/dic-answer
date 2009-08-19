@@ -1,0 +1,4 @@
+bin: bin = 0;
+bind: bin = 0; bind = 0;
+binder: bin = 0; bind = 0; binder = 0;
+binding: bin = 0; bind = 0; binding = 0;

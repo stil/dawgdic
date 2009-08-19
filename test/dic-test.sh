@@ -23,18 +23,18 @@ then
 fi
 
 ## Finds prefix keys from a lexicon.
-$find_bin lexicon.dic < lexicon > result
+$find_bin lexicon.dic < lexicon > dic-result
 if [ $? -ne 0 ]
 then
 	exit 1
 fi
 
 ## Checks the result.
-cmp result answer
+cmp dic-result dic-answer
 if [ $? -ne 0 ]
 then
 	exit 1
 fi
 
 ## Removes temporary files.
-rm -f lexicon.dic result
+rm -f lexicon.dic dic-result

@@ -13,13 +13,12 @@ namespace dawgdic {
 class Dictionary
 {
 public:
-	Dictionary() : units_(0), size_(0), units_buf_() {}
-	explicit Dictionary(std::vector<DictionaryUnit> *units_buf)
-		: units_(0), size_(0), units_buf_() { SwapUnitsBuf(units_buf); }
+	Dictionary() : units_(NULL), size_(0), units_buf_() {}
 
 	const DictionaryUnit *units() const { return units_; }
 	SizeType size() const { return size_; }
 	SizeType total_size() const { return sizeof(DictionaryUnit) * size_; }
+	SizeType file_size() const { return sizeof(BaseType) + total_size(); }
 
 	// Root index.
 	BaseType root() const { return 0; }
@@ -38,7 +37,7 @@ public:
 			sizeof(BaseType)))
 			return false;
 
-		SizeType size = base_size;
+		SizeType size = static_cast<SizeType>(base_size);
 		std::vector<DictionaryUnit> units_buf(size);
 		if (!input->read(reinterpret_cast<char *>(&units_buf[0]),
 			sizeof(DictionaryUnit) * size))
@@ -177,7 +176,7 @@ public:
 	// Initializes a dictionary.
 	void Clear()
 	{
-		units_ = 0;
+		units_ = NULL;
 		size_ = 0;
 		std::vector<DictionaryUnit>(0).swap(units_buf_);
 	}
@@ -200,14 +199,8 @@ public:
 		SwapUnitsBuf(&units_buf);
 	}
 
-private:
-	const DictionaryUnit *units_;
-	SizeType size_;
-	std::vector<DictionaryUnit> units_buf_;
-
-	// Disallows copies.
-	Dictionary(const Dictionary &);
-	Dictionary &operator=(const Dictionary &);
+public:
+	// Following member function is called from DawgBuilder.
 
 	// Swaps buffers for units.
 	void SwapUnitsBuf(std::vector<DictionaryUnit> *units_buf)
@@ -216,6 +209,15 @@ private:
 		size_ = static_cast<BaseType>(units_buf->size());
 		units_buf_.swap(*units_buf);
 	}
+
+private:
+	const DictionaryUnit *units_;
+	SizeType size_;
+	std::vector<DictionaryUnit> units_buf_;
+
+	// Disallows copies.
+	Dictionary(const Dictionary &);
+	Dictionary &operator=(const Dictionary &);
 };
 
 }  // namespace dawgdic
