@@ -1,4 +1,14 @@
-bin: bin = 0 bind = 0 binder = 0 binding = 0
+a: a = 0 an = 0 and = 0 appear = 0 apple = 0
+an: an = 0 and = 0
+and: and = 0
+appear: appear = 0
+apple: apple = 0
+bin: bin = 0 binary = 0 bind = 0 binder = 0 binding = 0
+binary: binary = 0
 bind: bind = 0 binder = 0 binding = 0
 binder: binder = 0
 binding: binding = 0
+blind: blind = 0
+can: can = 0 cancer = 0
+cancer: cancer = 0
+cat: cat = 0

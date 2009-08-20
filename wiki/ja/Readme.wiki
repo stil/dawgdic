@@ -156,3 +156,9 @@ if (dic.Find("banana") < 0)
   * http://dotnetperls.com/Content/Directed-Acyclic-Word-Graph.aspx
  # Wutka Consulting, Inc.: *Directed Acyclic Word Graphs*
   * http://www.wutka.com/dawg.html
+ # Taku Kudo: *Darts: Double-ARray Trie System*
+  * http://chasen.org/~taku/software/darts/
+ # Wikipedia: *Directed acyclic word graph - Wikipedia, the free encyclopedia*
+  * http://en.wikipedia.org/wiki/Directed_acyclic_word_graph
+ # JohnPaul Adamovsky: *Directed Acyclic Word Graph or DAWG*
+  * http://www.pathcom.com/~vadco/dawg.html

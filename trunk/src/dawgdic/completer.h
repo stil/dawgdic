@@ -65,10 +65,8 @@ public:
 			if (child_label != '\0')
 			{
 				// Follows a transition to the first child.
-//std::cerr << "Move to child: " << index << " -" << (int)child_label;
 				if (!dic_->Follow(child_label, &index))
 					return false;
-//std::cerr << "-> " << index << std::endl;
 
 				key_.back() = child_label;
 				key_.push_back('\0');
@@ -82,16 +80,15 @@ public:
 					UCharType sibling_label = guide_->sibling(index);
 
 					index_stack_.resize(index_stack_.size() - 1);
+					if (index_stack_.empty())
+						return false;
 					index = index_stack_.back();
 
-//std::cerr << "From: " << index << ": " << (int)sibling_label << std::endl;
 					if (sibling_label != '\0')
 					{
 						// Follows a transition to the next sibling.
-//std::cerr << "Move to sibling: " << index << " -" << (int)sibling_label;
 						if (!dic_->Follow(sibling_label, &index))
 							return false;
-//std::cerr << "-> " << index << std::endl;
 
 						key_[key_.size() - 2] = sibling_label;
 						index_stack_.push_back(index);
@@ -99,9 +96,6 @@ public:
 					}
 					key_[key_.size() - 2] = '\0';
 					key_.resize(key_.size() - 1);
-
-					if (index_stack_.empty())
-						return false;
 				}
 			}
 		}
@@ -112,7 +106,6 @@ public:
 			UCharType label = guide_->child(index);
 			if (!dic_->Follow(label, &index))
 				return false;
-//std::cerr << "Follow: " << index << std::endl;
 
 			key_.back() = label;
 			key_.push_back('\0');
