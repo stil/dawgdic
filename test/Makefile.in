@@ -132,8 +132,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-TESTS = dic-test.sh guide-test.sh
-dist_noinst_DATA = $(TESTS) lexicon dic-answer guide-answer
+TESTS = dic-test.sh guide-test.sh ranked-test.sh
+dist_noinst_DATA = $(TESTS) \
+	lexicon query dic-answer guide-answer ranked-answer
+
 all: all-am
 
 .SUFFIXES:

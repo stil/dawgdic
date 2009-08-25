@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.61)
-AC_INIT(dawgdic, 0.4.0, syata@acm.org)
+AC_INIT(dawgdic, 0.4.1, syata@acm.org)
 AC_CONFIG_SRCDIR([src/dawgdic-build.cc])
 AM_INIT_AUTOMAKE
 

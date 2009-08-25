@@ -21,15 +21,14 @@ public:
 
 	const Dictionary &dic() const { return *dic_; }
 	const Guide &guide() const { return *guide_; }
+
+	// These member functions are available only when Next() returns true.
 	const char *key() const
 	{
-		return key_.empty() ? "" : reinterpret_cast<const char *>(&key_[0]);
+		return reinterpret_cast<const char *>(&key_[0]);
 	}
-	SizeType length() const { return key_.empty() ? 0 : (key_.size() - 1); }
-	ValueType value() const
-	{
-		return dic_->has_value(last_index_) ? dic_->value(last_index_) : -1;
-	}
+	SizeType length() const { return key_.size() - 1; }
+	ValueType value() const { return dic_->value(last_index_); }
 
 	// Starts completing keys from given index and prefix.
 	void Start(BaseType index, const char *prefix = "")
@@ -65,55 +64,36 @@ public:
 			if (child_label != '\0')
 			{
 				// Follows a transition to the first child.
-				if (!dic_->Follow(child_label, &index))
+				if (!Follow(child_label, &index))
 					return false;
-
-				key_.back() = child_label;
-				key_.push_back('\0');
-				index_stack_.push_back(index);
 			}
 			else
 			{
 				for ( ; ; )
 				{
-					// Moves to the previous node.
 					UCharType sibling_label = guide_->sibling(index);
 
+					// Moves to the previous node.
+					key_.resize(key_.size() - 1);
+					key_.back() = '\0';
 					index_stack_.resize(index_stack_.size() - 1);
 					if (index_stack_.empty())
 						return false;
-					index = index_stack_.back();
 
+					index = index_stack_.back();
 					if (sibling_label != '\0')
 					{
 						// Follows a transition to the next sibling.
-						if (!dic_->Follow(sibling_label, &index))
+						if (!Follow(sibling_label, &index))
 							return false;
-
-						key_[key_.size() - 2] = sibling_label;
-						index_stack_.push_back(index);
 						break;
 					}
-					key_[key_.size() - 2] = '\0';
-					key_.resize(key_.size() - 1);
 				}
 			}
 		}
 
 		// Finds a terminal.
-		while (!dic_->has_value(index))
-		{
-			UCharType label = guide_->child(index);
-			if (!dic_->Follow(label, &index))
-				return false;
-
-			key_.back() = label;
-			key_.push_back('\0');
-			index_stack_.push_back(index);
-		}
-		last_index_ = index;
-
-		return true;
+		return FindTerminal(index);
 	}
 
 private:
@@ -126,6 +106,36 @@ private:
 	// Disallows copies.
 	Completer(const Completer &);
 	Completer &operator=(const Completer &);
+
+	// Follows a transition.
+	bool Follow(UCharType label, BaseType *index)
+	{
+		if (!dic_->Follow(label, index))
+			return false;
+
+		key_.back() = label;
+		key_.push_back('\0');
+		index_stack_.push_back(*index);
+		return true;
+	}
+
+	// Finds a terminal.
+	bool FindTerminal(BaseType index)
+	{
+		while (!dic_->has_value(index))
+		{
+			UCharType label = guide_->child(index);
+			if (!dic_->Follow(label, &index))
+				return false;
+
+			key_.back() = label;
+			key_.push_back('\0');
+			index_stack_.push_back(index);
+		}
+
+		last_index_ = index;
+		return true;
+	}
 };
 
 }  // namespace dawgdic
