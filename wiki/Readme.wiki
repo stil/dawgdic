@@ -160,5 +160,5 @@ if (dic.Find("banana") < 0)
   * http://chasen.org/~taku/software/darts/
  # Wikipedia: *Directed acyclic word graph - Wikipedia, the free encyclopedia*
   * http://en.wikipedia.org/wiki/Directed_acyclic_word_graph
- # JohnPaul Adamovsky: *Directed Acyclic Word Graph or DAWG*
+ # !JohnPaul Adamovsky: *Directed Acyclic Word Graph or DAWG*
   * http://www.pathcom.com/~vadco/dawg.html

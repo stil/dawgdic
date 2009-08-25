@@ -69,6 +69,12 @@ public:
 			static_cast<const BaseType *>(address) + 1);
 		size_ = *static_cast<const BaseType *>(address);
 	}
+	void Map(const void *address, SizeType size)
+	{
+		Clear();
+		units_ = static_cast<const GuideUnit *>(address);
+		size_ = size;
+	}
 
 	// Swaps Guides.
 	void Swap(Guide *Guide)
