@@ -50,10 +50,6 @@ private:
 	static const BaseType UPPER_MASK = ~(DictionaryUnit::OFFSET_MAX - 1);
 	static const BaseType LOWER_MASK = 0xFF;
 
-	// Disallows copies.
-	DictionaryBuilder(const DictionaryBuilder &);
-	DictionaryBuilder &operator=(const DictionaryBuilder &);
-
 	DictionaryBuilder(const Dawg &dawg, Dictionary *dic)
 		: dawg_(dawg), dic_(dic), units_(), extras_(), labels_(),
 		link_table_(), unfixed_index_(), num_of_unused_units_(0) {}
@@ -62,6 +58,10 @@ private:
 		for (SizeType i = 0; i < extras_.size(); ++i)
 			delete [] extras_[i];
 	}
+
+	// Disallows copies.
+	DictionaryBuilder(const DictionaryBuilder &);
+	DictionaryBuilder &operator=(const DictionaryBuilder &);
 
 	// Accesses units.
 	DictionaryUnit &units(BaseType index)

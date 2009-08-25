@@ -164,6 +164,8 @@ public:
 			static_cast<const BaseType *>(address) + 1);
 		size_ = *static_cast<const BaseType *>(address);
 	}
+
+	// Maps memory with its size.
 	void Map(const void *address, SizeType size)
 	{
 		Clear();

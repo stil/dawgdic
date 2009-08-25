@@ -24,11 +24,4 @@ dawgdic_include_HEADERS = \
 	dawgdic/completer.h \
 	dawgdic/guide.h \
 	dawgdic/guide-builder.h \
-	dawgdic/guide-unit.h \
-	dawgdic/ranked-completer.h \
-	dawgdic/ranked-completer-candidate.h \
-	dawgdic/ranked-completer-node.h \
-	dawgdic/ranked-guide.h \
-	dawgdic/ranked-guide-builder.h \
-	dawgdic/ranked-guide-link.h \
-	dawgdic/ranked-guide-unit.h
+	dawgdic/guide-unit.h
