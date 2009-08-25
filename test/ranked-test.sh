@@ -16,25 +16,25 @@ then
 fi
 
 ## Builds a dictionary from a lexicon.
-$build_bin -t lexicon lexicon.dic
+$build_bin -rt lexicon lexicon.dic
 if [ $? -ne 0 ]
 then
 	exit 1
 fi
 
 ## Finds prefix keys from a lexicon.
-$find_bin lexicon.dic < query > dic-result
+$find_bin -r lexicon.dic < query > ranked-result
 if [ $? -ne 0 ]
 then
 	exit 1
 fi
 
 ## Checks the result.
-cmp dic-result dic-answer
+cmp ranked-result ranked-answer
 if [ $? -ne 0 ]
 then
 	exit 1
 fi
 
 ## Removes temporary files.
-rm -f lexicon.dic dic-result
+rm -f lexicon.dic ranked-result
