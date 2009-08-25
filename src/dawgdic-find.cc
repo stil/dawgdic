@@ -1,6 +1,5 @@
 #include "dawgdic/completer.h"
 #include "dawgdic/dictionary.h"
-#include "dawgdic/ranked-completer.h"
 
 #include <fstream>
 #include <iostream>
@@ -12,13 +11,12 @@ namespace {
 class CommandOptions
 {
 public:
-	CommandOptions() : help_(false), guide_(false), ranked_(false),
+	CommandOptions() : help_(false), guide_(false),
 		dic_file_name_(), lexicon_file_name_() {}
 
 	// Reads options.
 	bool help() const { return help_; }
 	bool guide() const { return guide_; }
-	bool ranked() const { return ranked_; }
 	const std::string &dic_file_name() const { return dic_file_name_; }
 	const std::string &lexicon_file_name() const
 	{
@@ -41,9 +39,6 @@ public:
 						break;
 					case 'g':
 						guide_ = true;
-						break;
-					case 'r':
-						ranked_ = true;
 						break;
 					default:
 						// Invalid option.
@@ -76,15 +71,13 @@ public:
 			"\n"
 			"Options:\n"
 			"  -h  display this help and exit\n"
-			"  -g  load dictionary with guide\n"
-			"  -g  load dictionary with ranked guide\n";
+			"  -g  load dictionary with guide\n";
 		*output << std::endl;
 	}
 
 private:
 	bool help_;
 	bool guide_;
-	bool ranked_;
 	std::string dic_file_name_;
 	std::string lexicon_file_name_;
 
@@ -119,12 +112,11 @@ void FindPrefixKeys(const dawgdic::Dictionary &dic, std::istream *input)
 	}
 }
 
-// Example of completing ranked keys from each line of an input text.
-template <typename COMPLETER_TYPE, typename GUIDE_TYPE>
+// Example of completing keys from each line of an input text.
 void CompleteKeys(const dawgdic::Dictionary &dic,
-	const GUIDE_TYPE &guide, std::istream *input)
+	const dawgdic::Guide &guide, std::istream *input)
 {
-	COMPLETER_TYPE completer(dic, guide);
+	dawgdic::Completer completer(dic, guide);
 	std::string line;
 	while (std::getline(*input, line))
 	{
@@ -201,17 +193,9 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	if (options.ranked())
-	{
-		dawgdic::RankedGuide guide;
-		if (!guide.Read(dic_stream))
-		{
-			std::cerr << "error: failed to read RankedGuide" << std::endl;
-			return 1;
-		}
-		CompleteKeys<dawgdic::RankedCompleter>(dic, guide, lexicon_stream);
-	}
-	else if (options.guide())
+	if (!options.guide())
+		FindPrefixKeys(dic, lexicon_stream);
+	else
 	{
 		dawgdic::Guide guide;
 		if (!guide.Read(dic_stream))
@@ -219,10 +203,8 @@ int main(int argc, char *argv[])
 			std::cerr << "error: failed to read Guide" << std::endl;
 			return 1;
 		}
-		CompleteKeys<dawgdic::Completer>(dic, guide, lexicon_stream);
+		CompleteKeys(dic, guide, lexicon_stream);
 	}
-	else
-		FindPrefixKeys(dic, lexicon_stream);
 
 	return 0;
 }

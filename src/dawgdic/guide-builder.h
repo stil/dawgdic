@@ -1,11 +1,9 @@
 #ifndef DAWGDIC_GUIDE_BUILDER_H
 #define DAWGDIC_GUIDE_BUILDER_H
 
-#include "guide.h"
+#include "completer.h"
 #include "dawg.h"
 #include "dictionary.h"
-
-#include <vector>
 
 namespace dawgdic {
 
@@ -27,12 +25,12 @@ private:
 	std::vector<GuideUnit> units_;
 	std::vector<UCharType> is_fixed_table_;
 
+	GuideBuilder(const Dawg &dawg, const Dictionary &dic, Guide *guide)
+		: dawg_(dawg), dic_(dic), guide_(guide), units_(), is_fixed_table_() {}
+
 	// Disallows copies.
 	GuideBuilder(const GuideBuilder &);
 	GuideBuilder &operator=(const GuideBuilder &);
-
-	GuideBuilder(const Dawg &dawg, const Dictionary &dic, Guide *guide)
-		: dawg_(dawg), dic_(dic), guide_(guide), units_(), is_fixed_table_() {}
 
 	bool BuildGuide()
 	{

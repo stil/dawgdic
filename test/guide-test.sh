@@ -16,14 +16,14 @@ then
 fi
 
 ## Builds a dictionary from a lexicon.
-$build_bin -gt lexicon lexicon.dic
+$build_bin -g lexicon lexicon.dic
 if [ $? -ne 0 ]
 then
 	exit 1
 fi
 
 ## Finds prefix keys from a lexicon.
-$find_bin -g lexicon.dic < query > guide-result
+$find_bin -g lexicon.dic < lexicon > guide-result
 if [ $? -ne 0 ]
 then
 	exit 1
