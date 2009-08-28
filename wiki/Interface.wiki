@@ -4,7 +4,7 @@
 
 == Main Interfaces ==
 
-The main classes of this library are given as follows:
+The following table shows the main classes of the library *dawgdic*.
 
 || *Header* || *Namespace* || *Class* ||
 || dawgdic/dawg.h || dawgdic || Dawg ||
@@ -14,7 +14,7 @@ The main classes of this library are given as follows:
 || dawgdic/guide.h || dawgdic || Guide ||
 || dawgdic/guide-builder.h || dawgdic || !GuideBuilder ||
 || dawgdic/completer.h || dawgdic || Completer ||
-|| dawgdic/ranked-guide.h || dawgdic || RankedGuide ||
+|| dawgdic/ranked-guide.h || dawgdic || !RankedGuide ||
 || dawgdic/ranked-guide-builder.h || dawgdic || !RankedGuideBuilder ||
 || dawgdic/ranked-completer.h || dawgdic || !RankedCompleter ||
 
@@ -203,7 +203,6 @@ static bool Build(const Dawg &dawg, Dictionary *dic, BaseType *num_of_unused_uni
 
 This function builds a dictionary from a *dawg*,
 and then updates *dic* and *num_of_unused_units*.
-After that, *this* object will be initialized.
 
 ----
 

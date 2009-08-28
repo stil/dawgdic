@@ -14,7 +14,7 @@
 || dawgdic/guide.h || dawgdic || Guide ||
 || dawgdic/guide-builder.h || dawgdic || !GuideBuilder ||
 || dawgdic/completer.h || dawgdic || Completer ||
-|| dawgdic/ranked-guide.h || dawgdic || RankedGuide ||
+|| dawgdic/ranked-guide.h || dawgdic || !RankedGuide ||
 || dawgdic/ranked-guide-builder.h || dawgdic || !RankedGuideBuilder ||
 || dawgdic/ranked-completer.h || dawgdic || !RankedCompleter ||
 
@@ -26,21 +26,26 @@
 || *Namespace* || dawgdic ||
 
 {{{
-// 遷移数と状態数．
+// 確保された DawgUnit の数を返す．
 SizeType size() const;
+}}}
+
+基本的に *!DawgUnit* は DAWG の遷移と対応するため，
+以下の関数 *num_of_transitions()* とほぼ同じ値を返す．
+
+{{{
+// DAWG を構成する遷移の数を返す．
 SizeType num_of_transitions() const;
+// DAWG を構成する状態の数を返す．
 SizeType num_of_states() const;
 }}}
 
-DAWG を構成する遷移および状態の数を返す．
-
 {{{
-// 併合された遷移および状態の数．
+// DAWG の構築において併合された遷移の数を返す．
 SizeType num_of_merged_transitions() const;
+// DAWG の構築において併合された状態の数を返す．
 SizeType num_of_merged_states() const;
 }}}
-
-DAWG の構築において併合された遷移および状態の数を返す．
 
 ----
 
@@ -50,40 +55,34 @@ DAWG の構築において併合された遷移および状態の数を返す．
 || *Namespace* || dawgdic ||
 
 {{{
-// 遷移数と状態数．
+// Dawg における同名の関数と同様の値を返す．
 SizeType size() const;
 SizeType num_of_transitions() const;
 SizeType num_of_states() const;
-}}}
-
-DAWG を構成する遷移および状態の数を返す．
-
-{{{
-// 併合された遷移および状態の数．
 SizeType num_of_merged_transitions() const;
 SizeType num_of_merged_states() const;
 }}}
 
-呼び出し時までに併合された遷移および状態の数を返す．
-
 {{{
-// キーを DAWG に追加する．
+// キーを DAWG に登録する．
 bool Insert(const CharType *key, ValueType value = 0);
 bool Insert(const CharType *key, SizeType length, ValueType value);
 }}}
 
-これらの関数は，キー *key* を DAWG に追加する．
-長さ *length* が 0 のキーは追加することができない．
-また，キーは辞書順に追加する必要があり，
-レコード *value* は 0 以上の整数でなければならない．
+キーは辞書順に登録する必要があり，
+不正な順序でキーを登録しようとした場合は false を返す．
+また，キーの長さ *length* が指定されていない場合，
+NULL 文字が出現するまでをキーの長さとして使用する．
+レコード *value* は 0 以上 INT_MAX 以下の整数のみを受け付ける．
 
 {{{
-// DAWG の構築を終了する．
+// DAWG の構築を終了し，オブジェクトを初期化する．
 bool Finish(Dawg *dawg);
 }}}
 
-DAWG の構築を終了し，完成した DAWG を *dawg* に渡す．
-なお，オブジェクト *this* は初期化される．
+すべてのキーを登録した後で呼び出す関数であり，完成した DAWG を *dawg* に渡す．
+このとき，管理しているメモリを *dawg* に引き継ぐため，
+オブジェクト *this* は初期化されることになる．
 
 ----
 
@@ -93,69 +92,60 @@ DAWG の構築を終了し，完成した DAWG を *dawg* に渡す．
 || *Namespace* || dawgdic ||
 
 {{{
+// 辞書を構成する配列の開始アドレスを返す．
 const DictionaryUnit *units() const;
 }}}
 
-辞書を構成する配列の先頭要素へのポインタを返す．
+辞書は単一の配列によって表現されるため，
+この配列を保存しておくことにより，簡単に辞書を復元することができる．
+なお，メモリ上の配列から辞書を復元するには関数 *Map()* を利用する．
 
 {{{
+// 辞書を構成する配列の要素数を返す．
 SizeType size() const;
-}}}
-
-辞書を構成する配列の要素数を返す．
-
-{{{
+// 辞書を構成する配列に割り当てなければならない最低限のメモリ量を byte 単位で返す．
 SizeType total_size() const;
-}}}
-
-辞書の構成に必要なメモリ量を byte 単位で返す．
-
-{{{
+// ストリームに書き出されるサイズを byte 単位で返す．
 SizeType file_size() const;
 }}}
-
-ストリームに書き出した場合のサイズを返す．
 
 {{{
 // 辞書を入力ストリームから読み込む．
 bool Read(std::istream *input);
-}}}
-
-入力ストリーム *input* からデータを読み込み，辞書を復元する．
-
-{{{
 // 辞書を出力ストリームに書き出す．
 bool Write(std::ostream *output) const;
 }}}
 
-出力ストリーム *output* に辞書を書き出す．
-
 {{{
-// 完全一致検索．
+// キーが辞書に登録されているかどうかを返す．
 bool Contains(const CharType *key) const;
 bool Contains(const CharType *key, SizeType length) const;
 }}}
 
-辞書引きをおこなう関数であり，
-キー *key* が辞書に登録されているかどうかを返す．
+キーの長さ *length* が指定されていない場合，
+NULL 文字が出現するまでをキーと判断する．
 
 {{{
-// 完全一致検索．
+// キーが辞書に登録されているかどうかを確認し，登録されている場合には
+// 関連付けられているレコードを返す．
 ValueType Find(const CharType *key) const;
 ValueType Find(const CharType *key, SizeType length) const;
 bool Find(const CharType *key, ValueType *value) const;
 bool Find(const CharType *key, SizeType length, ValueType *value) const;
 }}}
 
-辞書引きをおこなう関数であり，キー *key* が辞書に登録されている場合，
-関連づけられているレコード *value* を返す．
-なお，キーが存在しない場合，レコードとして -1 が返される．
+レコードを受け取るための引数 *value* が指定されていない場合，
+レコードがそのまま返り値となる．
+なお，与えられたキーが辞書に登録されていない場合，レコードとして -1 を返す．
 
 {{{
-// 前方一致検索．
+// 初期状態のインデックスを返す．
 BaseType root() const;
+// 与えられた状態がキーの終端になっているかどうかを返す．
 bool has_value(BaseType index) const;
+// 与えられた状態と対応するキーに関連付けられたレコードを返す．
 ValueType value(BaseType index) const;
+// 状態の遷移をおこない，インデックスを更新する．
 bool Follow(CharType label, BaseType *index) const;
 bool Follow(const CharType *s, BaseType *index);
 bool Follow(const CharType *s, BaseType *index, SizeType *count);
@@ -163,26 +153,23 @@ bool Follow(const CharType *s, SizeType length, BaseType *index);
 bool Follow(const CharType *s, SizeType length, BaseType *index, SizeType *count);
 }}}
 
-前方一致検索をおこなうためのインタフェースであり，
-関数 *root()* により探索開始位置を取得した後，
+これらの関数は，前方一致検索のために提供されている．
+検索においては，関数 *root()* により初期状態を取得した後，
 関数 *Follow()* によって文字あるいは文字列に対応する遷移を辿る．
-探索位置から終端への遷移があるかどうかは関数 *has_value()* により確認できる．
-また，終端への遷移がある場合，関数 *value()* によりレコードを取得できる．
+そして，到達した状態がキーの終端になっているかどうかを
+関数 *has_value()* によって確認できる．
+関数 *has_value()* が true を返した場合，
+関数 *value()* により関連付けられているレコードを取得できる．
+使用例は HowToLookup に示されている．
 
 {{{
-// 任意の領域を配列に割り当てる．
+// 辞書を構成する配列として任意の領域を割り当てる．
 void Map(const void *address);
-}}}
-
-任意のアドレス *address* から始まる領域を配列に割り当てる．
-ただし，先頭の 4 bytes は要素数として利用される．
-
-{{{
-// 任意の領域を配列に割り当てる．
 void Map(const void *address, SizeType size);
 }}}
 
-任意のアドレス *address* から始まる領域を配列に割り当てる．
+配列の要素数 *size* が指定されていない場合，
+与えられた領域の先頭 4 bytes を要素数として使用する．
 
 ----
 
@@ -197,9 +184,9 @@ static bool Build(const Dawg &dawg, Dictionary *dic, BaseType *num_of_unused_uni
 }}}
 
 *dawgdic::!DawgBuilder* により構築した *dawg* から辞書を構築し，
-*dic* を新しい辞書に置き換えるとともに，
-未使用の要素数を *num_of_unused_units* に代入する．
-なお，オブジェクト *this* は初期化される．
+*dic* を新しい辞書に置き換える．
+また，第 3 引数 *num_of_unused_units* が NULL でない場合，
+構築された辞書における未使用要素の数を代入する．
 
 ----
 
@@ -211,16 +198,9 @@ static bool Build(const Dawg &dawg, Dictionary *dic, BaseType *num_of_unused_uni
 {{{
 // キー補完用の辞書を入力ストリームから読み込む．
 bool Read(std::istream *input);
-}}}
-
-入力ストリーム *input* からデータを読み込み，キー補完用の辞書を復元する．
-
-{{{
 // キー補完用の辞書を出力ストリームに書き出す．
 bool Write(std::ostream *output) const;
 }}}
-
-出力ストリーム *output* にキー補完用の辞書を書き出す．
 
 ----
 
@@ -248,19 +228,15 @@ static bool Build(const Dawg &dawg, const Dictionary &dic, Guide *guide);
 {{{
 // オブジェクトを初期化する．
 Completer();
+// オブジェクトを初期化するとともに，キー補完に用いる辞書の組を設定する．
 Completer(const Dictionary &dic, const Guide &guide);
 }}}
 
-キー補完用のオブジェクトを初期化する．
-補完に用いる辞書の組 *dic* と *guide* を設定できる．
-
 {{{
-// 基本辞書およびキー補完用の辞書を切り替える．
+// 基本辞書およびキー補完用の辞書を設定する．
 void set_dic(const Dictionary &dic);
 void set_guide(const Guide &guide);
 }}}
-
-補完に用いる辞書の組 *dic* と *guide* をそれぞれ切り替える．
 
 {{{
 // 基本辞書およびキー補完用の辞書を取得する．
@@ -268,35 +244,28 @@ const Dictionary &dic() const;
 const Guide &guide() const;
 }}}
 
-補完に用いている辞書を取得する．
-
 {{{
-// キー補完を開始する．
+// キー補完の準備をおこなう．
 void Start(BaseType index, const char *prefix = "");
 void Start(BaseType index, const char *prefix, SizeType length);
 }}}
 
-探索開始位置 *index* に基づいてキー補完を開始する．
-指定された *prefix* は探索開始位置に影響することなく，
+与えられた状態 *index* を開始位置としてキー補完の準備をおこなう．
+指定された *prefix* は開始位置に影響することなく，
 補完結果として得られる文字列の先頭に付加される．
+開始位置 *index* に到達するまでの文字列を *prefix* として渡しておけば，
+関数 *Next()* によりキーを完全に復元することができる．
 
 {{{
-// 次の補完候補を取得する．
+// キー補完を逐次実行し，次のキーを復元する．
 bool Next();
-}}}
-
-キー補完を逐次実行し，次の補完候補を取得する．
-
-{{{
-// 補完により取得したキーの情報を取得する．
+// 復元されたキーを NULL 文字を終端とする文字列として返す．
 const char *key() const;
+// 復元されたキーの長さを返す．
 SizeType length() const;
+// 復元されたキーに関連付けられているレコードを返す．
 ValueType value() const;
 }}}
-
-関数 *key()* は NULL 文字を終端とする文字列へのポインタを返し，
-関数 *length()* はキーの長さを返す．
-また，関数 *value()* は関連付けられているレコードの値を返す．
 
 ----
 
