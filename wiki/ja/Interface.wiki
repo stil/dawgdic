@@ -11,6 +11,12 @@
 || dawgdic/dawg-builder.h || dawgdic || !DawgBuilder ||
 || dawgdic/dictionary.h || dawgdic || Dictionary ||
 || dawgdic/dictionary-builder.h || dawgdic || !DictionaryBuilder ||
+|| dawgdic/guide.h || dawgdic || Guide ||
+|| dawgdic/guide-builder.h || dawgdic || !GuideBuilder ||
+|| dawgdic/completer.h || dawgdic || Completer ||
+|| dawgdic/ranked-guide.h || dawgdic || RankedGuide ||
+|| dawgdic/ranked-guide-builder.h || dawgdic || !RankedGuideBuilder ||
+|| dawgdic/ranked-completer.h || dawgdic || !RankedCompleter ||
 
 ----
 
@@ -105,6 +111,12 @@ SizeType total_size() const;
 辞書の構成に必要なメモリ量を byte 単位で返す．
 
 {{{
+SizeType file_size() const;
+}}}
+
+ストリームに書き出した場合のサイズを返す．
+
+{{{
 // 辞書を入力ストリームから読み込む．
 bool Read(std::istream *input);
 }}}
@@ -188,3 +200,115 @@ static bool Build(const Dawg &dawg, Dictionary *dic, BaseType *num_of_unused_uni
 *dic* を新しい辞書に置き換えるとともに，
 未使用の要素数を *num_of_unused_units* に代入する．
 なお，オブジェクト *this* は初期化される．
+
+== Guide ==
+
+|| *Header* || dawgdic/guide.h ||
+|| *Namespace* || dawgdic ||
+
+{{{
+// キー補完用の辞書を入力ストリームから読み込む．
+bool Read(std::istream *input);
+}}}
+
+入力ストリーム *input* からデータを読み込み，キー補完用の辞書を復元する．
+
+{{{
+// キー補完用の辞書を出力ストリームに書き出す．
+bool Write(std::ostream *output) const;
+}}}
+
+出力ストリーム *output* にキー補完用の辞書を書き出す．
+
+== !GuideBuilder ==
+
+|| *Header* || dawgdic/guide-builder.h ||
+|| *Namespace* || dawgdic ||
+
+{{{
+// DAWG と基本辞書からキー補完用の辞書を構築する．
+static bool Build(const Dawg &dawg, const Dictionary &dic, Guide *guide);
+}}}
+
+*dawgdic::!DawgBuilder* により構築した *dawg* と，
+*dawgdic::!DictionaryBuilder* により構築した *dic* から
+キー補完用の辞書を構築し，*guide* を新しい辞書に置き換える．
+
+== Completer ==
+
+|| *Header* || dawgdic/completer.h ||
+|| *Namespace* || dawgdic ||
+
+{{{
+// オブジェクトを初期化する．
+Completer();
+Completer(const Dictionary &dic, const Guide &guide);
+}}}
+
+キー補完用のオブジェクトを初期化する．
+補完に用いる辞書の組 *dic* と *guide* を設定できる．
+
+{{{
+// 基本辞書およびキー補完用の辞書を切り替える．
+void set_dic(const Dictionary &dic);
+void set_guide(const Guide &guide);
+}}}
+
+補完に用いる辞書の組 *dic* と *guide* をそれぞれ切り替える．
+
+{{{
+// 基本辞書およびキー補完用の辞書を取得する．
+const Dictionary &dic() const;
+const Guide &guide() const;
+}}}
+
+補完に用いている辞書を取得する．
+
+{{{
+// キー補完を開始する．
+void Start(BaseType index, const char *prefix = "");
+void Start(BaseType index, const char *prefix, SizeType length);
+}}}
+
+探索開始位置 *index* に基づいてキー補完を開始する．
+指定された *prefix* は探索開始位置に影響することなく，
+補完結果として得られる文字列の先頭に付加される．
+
+{{{
+// 次の補完候補を取得する．
+bool Next();
+}}}
+
+キー補完を逐次実行し，次の補完候補を取得する．
+
+{{{
+// 補完により取得したキーの情報を取得する．
+const char *key() const;
+SizeType length() const;
+ValueType value() const;
+}}}
+
+関数 *key()* は NULL 文字を終端とする文字列へのポインタを返し，
+関数 *length()* はキーの長さを返す．
+また，関数 *value()* は関連付けられているレコードの値を返す．
+
+== !RankedGuide ==
+
+|| *Header* || dawgdic/ranked-guide.h ||
+|| *Namespace* || dawgdic ||
+
+*Guide* と同様の関数を提供する．
+
+== !RankedGuideBuilder ==
+
+|| *Header* || dawgdic/ranked-guide-builder.h ||
+|| *Namespace* || dawgdic ||
+
+*!GuideBuilder* と同様の関数を提供する．
+
+== !RankedCompleter ==
+
+|| *Header* || dawgdic/ranked-completer.h ||
+|| *Namespace* || dawgdic ||
+
+*Completer* と同様の関数を提供する．

@@ -11,6 +11,12 @@ The main classes of this library are given as follows:
 || dawgdic/dawg-builder.h || dawgdic || !DawgBuilder ||
 || dawgdic/dictionary.h || dawgdic || Dictionary ||
 || dawgdic/dictionary-builder.h || dawgdic || !DictionaryBuilder ||
+|| dawgdic/guide.h || dawgdic || Guide ||
+|| dawgdic/guide-builder.h || dawgdic || !GuideBuilder ||
+|| dawgdic/completer.h || dawgdic || Completer ||
+|| dawgdic/ranked-guide.h || dawgdic || RankedGuide ||
+|| dawgdic/ranked-guide-builder.h || dawgdic || !RankedGuideBuilder ||
+|| dawgdic/ranked-completer.h || dawgdic || !RankedCompleter ||
 
 ----
 
@@ -107,12 +113,17 @@ SizeType total_size() const;
 This function returns the number of bytes allocated to double-array elements.
 
 {{{
+SizeType file_size() const;
+}}}
+
+This function returns the number of bytes written by the function *Write()*.
+
+{{{
 // Reads a dictionary from an input stream.
 bool Read(std::istream *input);
 }}}
 
-This function reads a double-array from an *input* stream and
-restores a double-array.
+This function reads a double-array from an *input* stream.
 
 {{{
 // Writes a dictionry into an output stream.
@@ -193,3 +204,117 @@ static bool Build(const Dawg &dawg, Dictionary *dic, BaseType *num_of_unused_uni
 This function builds a dictionary from a *dawg*,
 and then updates *dic* and *num_of_unused_units*.
 After that, *this* object will be initialized.
+
+== Guide ==
+
+|| *Header* || dawgdic/guide.h ||
+|| *Namespace* || dawgdic ||
+
+{{{
+// Reads a completion dictionary from an input stream.
+bool Read(std::istream *input);
+}}}
+
+This function reads a completion dictionary from an *input* stream.
+
+{{{
+// Writes a dictionry into an output stream.
+bool Write(std::ostream *output) const;
+}}}
+
+This function writes a completion dictionary into an *output* stream.
+
+== !GuideBuilder ==
+
+|| *Header* || dawgdic/guide-builder.h ||
+|| *Namespace* || dawgdic ||
+
+{{{
+// Builds a completion dictionary from a dawg and a dictionary.
+static bool Build(const Dawg &dawg, const Dictionary &dic, Guide *guide);
+}}}
+
+This function builds a completion dictionary from
+a pair of *dawg* and *dic*, and then updates *guide*.
+
+== Completer ==
+
+|| *Header* || dawgdic/completer.h ||
+|| *Namespace* || dawgdic ||
+
+{{{
+// Initializes an object.
+Completer();
+Completer(const Dictionary &dic, const Guide &guide);
+}}}
+
+Initializes an object for completing keys from a given prefix.
+The completion process requires a base dictionary *dic* and
+its corresponding completion dictionary *guide*.
+
+{{{
+// Sets a base dictionary or a completion dictionary.
+void set_dic(const Dictionary &dic);
+void set_guide(const Guide &guide);
+}}}
+
+These functions sets a base dictionary and
+its corresponding completion dictionary.
+
+{{{
+// Gets a reference to a base dictionary or a completion dictionary.
+const Dictionary &dic() const;
+const Guide &guide() const;
+}}}
+
+These functions return references to
+a base dictionary and a completion dictionary.
+
+{{{
+// Begins key completion.
+void Start(BaseType index, const char *prefix = "");
+void Start(BaseType index, const char *prefix, SizeType length);
+}}}
+
+Prepares for completing keys from a given *index*.
+The other argument *prefix* is just returned as
+the prefix of completed keys.
+
+{{{
+// Gets the next completion result.
+bool Next();
+}}}
+
+This function incrementally gets completion results.
+
+{{{
+// Gets information of a completed key.
+const char *key() const;
+SizeType length() const;
+ValueType value() const;
+}}}
+
+The function *key()* returns a pointer to a completed key (zero terminated),
+and the function *length()* returns the key length.
+Also, the function *value()* return the key record.
+
+== !RankedGuide ==
+
+|| *Header* || dawgdic/ranked-guide.h ||
+|| *Namespace* || dawgdic ||
+
+See *Guide*.
+
+== !RankedGuideBuilder ==
+
+|| *Header* || dawgdic/ranked-guide-builder.h ||
+|| *Namespace* || dawgdic ||
+
+See *!GuideBuilder*.
+
+== !RankedCompleter ==
+
+|| *Header* || dawgdic/ranked-completer.h ||
+|| *Namespace* || dawgdic ||
+
+See *Completer*.
