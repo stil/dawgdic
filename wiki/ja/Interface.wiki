@@ -201,6 +201,8 @@ static bool Build(const Dawg &dawg, Dictionary *dic, BaseType *num_of_unused_uni
 未使用の要素数を *num_of_unused_units* に代入する．
 なお，オブジェクト *this* は初期化される．
 
+----
+
 == Guide ==
 
 || *Header* || dawgdic/guide.h ||
@@ -220,6 +222,8 @@ bool Write(std::ostream *output) const;
 
 出力ストリーム *output* にキー補完用の辞書を書き出す．
 
+----
+
 == !GuideBuilder ==
 
 || *Header* || dawgdic/guide-builder.h ||
@@ -233,6 +237,8 @@ static bool Build(const Dawg &dawg, const Dictionary &dic, Guide *guide);
 *dawgdic::!DawgBuilder* により構築した *dawg* と，
 *dawgdic::!DictionaryBuilder* により構築した *dic* から
 キー補完用の辞書を構築し，*guide* を新しい辞書に置き換える．
+
+----
 
 == Completer ==
 
@@ -292,6 +298,8 @@ ValueType value() const;
 関数 *length()* はキーの長さを返す．
 また，関数 *value()* は関連付けられているレコードの値を返す．
 
+----
+
 == !RankedGuide ==
 
 || *Header* || dawgdic/ranked-guide.h ||
@@ -299,12 +307,16 @@ ValueType value() const;
 
 *Guide* と同様の関数を提供する．
 
+----
+
 == !RankedGuideBuilder ==
 
 || *Header* || dawgdic/ranked-guide-builder.h ||
 || *Namespace* || dawgdic ||
 
 *!GuideBuilder* と同様の関数を提供する．
+
+----
 
 == !RankedCompleter ==
 

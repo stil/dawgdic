@@ -4,7 +4,9 @@
 
 == Exact Matching ==
 
-The following example gives a function to lookup a key in a dictionary.
+The following example gives a function to lookup a key.
+The function lookups a given key and writes the result into
+the standard output stream.
 
 {{{
 #include <dawgdic/dictionary.h>
@@ -12,14 +14,14 @@ The following example gives a function to lookup a key in a dictionary.
 // Lookups a key in a dictionary.
 void Lookup(const dawgdic::Dictionary &dic, const char *key) {
 
-  // Checks whether a dictionary contains a given key or not.
+  // Checks whether the dictionary contains the given key or not.
   if (dic.Contains(key))
     std::cout << key << ": " << ": found" << std::endl;
   else
     std::cout << key << ": " << ": not found" << std::endl;
 
-  // Checks whether a dictionary contains a given key or not.
-  // Also, reads a record if available.
+  // Checks whether the dictionary contains the given key or not.
+  // If the key is available, then reads a record from the dictionary.
   int record;
   if (dic.Find(key, &record))
     std::cout << key << ": " << ": found (" << record << ')' << std::endl;
@@ -31,7 +33,8 @@ void Lookup(const dawgdic::Dictionary &dic, const char *key) {
 == Prefix Matching ==
 
 The following example gives a function to find
-all occurrences of keys in text.
+all the occurrences of keys in text. The function finds keys and
+writes the results into the standard output stream.
 
 {{{
 #include <string>
@@ -39,7 +42,7 @@ all occurrences of keys in text.
 #include <dawgdic/dictionary.h>
 #include <dawgdic/dictionary-explorer.h>
 
-// Finds all the keys in a given text.
+// Finds all the occurrences of keys in a given text.
 void Filter(const dawgdic::Dictionary &dic, const char *text) {
 
   for (const char *p = text; *p != '\0'; ++p) {
@@ -48,15 +51,18 @@ void Filter(const dawgdic::Dictionary &dic, const char *text) {
     BaseType index = dic.root();
     for (const char *q = p; *q != '\0'; ++q) {
 
-      // Follows a transition one by one.
+      // Follows a transition.
       if (!dic.Follow(*q, &index))
         break;
 
-      // Outputs information of a matched key.
-      if (dic.has_value(index))
+      // Shows information of a matched key.
+      // The information consists of the start position, the length,
+      // the record and the string of that key.
+      if (dic.has_value(index)) {
         std::cout << '(' << (p - text) << ", " << (q + 1 - p) << ", "
-                  << dic.value(index) << "): "
-                  << std::string(p, q + 1 - p) << std::endl;
+                  << dic.value(index) << "): ";
+        std::cout.write(p, q + 1 - p) << std::endl;
+      }
     }
   }
 }

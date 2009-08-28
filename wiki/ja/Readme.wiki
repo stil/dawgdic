@@ -6,12 +6,13 @@
 == はじめに ==
 
 本プロジェクトは，Directed Acyclic Word Graph (DAWG) による
-辞書検索を実現するライブラリ *dawgdic* を提供します．
+辞書を実現するライブラリ *dawgdic* を提供します．
 
 DAWG はトライ（Trie）の共通部分木を併合したグラフ構造であり，
 トライを決定性有限オートマトン（DFA）とみなすとき，
 最小決定性有限オートマトン（MDFA）に相当します．
-そのため，メモリ使用量において，トライよりも優れています．
+そのため，トライと同等の検索性能を維持しつつ，
+メモリ使用量においては，トライよりも優れています．
 さらに，*dawgdic* では，DAWG の実装にダブル配列を用いているため，
 ダブル配列によるトライのライブラリ *Darts* と比較しても，
 遜色ない検索速度を実現することができるという特徴があります．
@@ -20,8 +21,9 @@ DAWG はトライ（Trie）の共通部分木を併合したグラフ構造で�
   * [Readme]: 最初にお読みください．
    * [HowToBuild]: 辞書構築の方法に関するドキュメントです．
    * [HowToLookup]: 辞書検索の方法に関するドキュメントです．
+   * [HowToComplete]: キー補完の方法に関するドキュメントです（準備中）．
   * [Interface]: クラスのインタフェースに関するドキュメントです．
-  * [Algorithm]
+  * [Algorithm]: アルゴリズムに関するドキュメントです（準備中）．
 
 ----
 
@@ -52,6 +54,7 @@ C++ ヘッダライブラリとして *<dawgdic/`*`.h>* がインストールさ
   * *<dawgdic/`*`.h>*
    * 辞書を構築するためのクラスを提供します．
    * キーを検索するためのクラスを提供します．
+   * キーを補完するためのクラスを提供します．
 
 === インストールせずに使う方法 ===
 
@@ -73,9 +76,9 @@ src/dawgdic 以下のヘッダをプロジェクトのディレクトリに直�
    * *dawgdic::!DawgBuilder* が DAWG 構築用のクラスです．
    * *dawgdic::Dawg* が DAWG のクラスです．
  # DAWG の変換
-  * 単純な DAWG を辞書へと変換します．
-   * *dawgdic::!DictionaryBuilder* 辞書構築用のクラスです.
-   * *dawgdic::Dictionary* は辞書のクラスです．
+  * 単純な DAWG をダブル配列による辞書へと変換します．
+   * *dawgdic::!DictionaryBuilder* が辞書構築用のクラスです.
+   * *dawgdic::Dictionary* が辞書のクラスです．
 
 以下の例では，2 つのキー "apple" と "orange" に対する辞書を構築しています．
 キーの登録時に引数を省略するとデフォルトの値 0 がレコードとして
@@ -89,13 +92,16 @@ src/dawgdic 以下のヘッダをプロジェクトのディレクトリに直�
 #include <dawgdic/dawg-builder.h>
 #include <dawgdic/dictionary-builder.h>
 
+// キーを DAWG に登録する．
 dawgdic::DawgBuilder dawg_builder;
 dawg_builder.Insert("apple");
 dawg_builder.Insert("orange");
 
+// DAWG を完成させる．
 dawgdic::Dawg dawg;
 dawg_builder.Finish(&dawg);
 
+// DAWG を辞書に変換する．
 dawgdic::Dictionary dic;
 dawgdic::DictionaryBuilder::Build(dawg, &dic);
 
@@ -107,7 +113,7 @@ dic.Write(&dic_file);
 === 辞書へのアクセス ===
 
 以下の例では，辞書からキーを検索しています．
-前方一致検索をおこなう場合は，
+入力文字列の先頭に一致するキーを検索（前方一致検索）する場合は，
 *dawgdic::Dictionary* のメンバ関数 *Follow()* を利用してください．
 
 {{{
@@ -121,8 +127,11 @@ std::ifstream dic_file("test.dic", ios::binary);
 dawgdic::Dictionary dic;
 dic.Read(&dic_file);
 
+// キーの有無のみを確認する．
 if (dic.Contains("apple"))
   std::cout << "apple: found" << std::endl;
+
+// キーを検索してレコードを取得する．
 if (dic.Find("banana") < 0)
   std::cout << "banana: not found" << std::endl;
 }}}

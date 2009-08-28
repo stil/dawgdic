@@ -1,7 +1,7 @@
 #summary Please read this document first.
 #labels Phase-Design,Featured
 
-= C++ Header Library of DAWG Dictionary Algorithm =
+= C++ Header Library for DAWG Dictionaries =
 
 == Introduction ==
 
@@ -9,18 +9,19 @@ This project provides a library *dawgdic* for building and accessing
 dictionaries implemented with directed acyclic word graphs (DAWG).
 
 A dawg is constructed by minimizing a trie
-as a deterministic finite automaton (DFA)
-and thus it has an advantage in memory usage.
+as a deterministic finite automaton (DFA),
+and thus the dawg has an advantage in memory usage.
 In addition, *dawgdic* uses a double-array as a base data structure,
 so its retrieval speed is as fast as that of *Darts*,
 a library for building and accessing double-array tries.
 
  * Documentation
   * [Readme]: Please read this document first.
-   * [HowToBuild]: An example to build a dictionary from a sorted lexicon.
-   * [HowToLookup]: An example to lookup keys in a dictionary.
-  * [Interface]: This document provides class interfaces.
-  * [Algorithm]
+   * [HowToBuild]: Examples to build a dictionary from a sorted lexicon.
+   * [HowToLookup]: Examples to lookup keys in a dictionary.
+   * [HowToComplete]: Examples to complete keys from a given prefix (to be written).
+  * [Interface]: This document describes class interfaces.
+  * [Algorithm]: This document describes algorightms (to be written).
 
 ----
 
@@ -28,7 +29,7 @@ a library for building and accessing double-array tries.
 
 === Basic Installation ===
 
-In Linux, please follow the basic installation process below:
+On Unix-like systems, please follow the basic installation process below:
 
 {{{
 ./configure
@@ -36,9 +37,9 @@ make
 make install
 }}}
 
-This process installs two commands, *dawgdic-build* and *dawgdic-find*,
+This process installs 2 commands, *dawgdic-build* and *dawgdic-find*,
 and headers *<dawgdic/`*`.h>* as a C++ header library.
-Outline of commands and headers are given as follows:
+Outline of the commands and headers are given as follows:
 
  * Commands
   * *make-dawg*
@@ -49,14 +50,15 @@ Outline of commands and headers are given as follows:
    * Finds keys in prefixes of each input line.
  * Headers
   * *<dawgdic/`*`.h>*
-   * Defines classes for building a dictionary from a lexicon.
-   * Defines classes for finding keys in a dictionary.
+   * Define classes for building a dictionary from a lexicon.
+   * Define classes for finding keys in a dictionary.
+   * Define classes for completing keys from a given prefix.
 
 === Without Installation ===
 
-If you want to use *dawgdic* on Windows or without installation.
+If you need to use *dawgdic* without installation, e.g., on Windows.
 Please copy headers in src/dawgdic to
-include directory or your project directory.
+your project directory or include directory.
 
 ----
 
@@ -64,11 +66,11 @@ include directory or your project directory.
 
 === Bulding Dictionary ===
 
-The construction process is given as follows:
+The construction process is as follows:
 
  # Dawg construction
   * Builds a simple dawg from a lexicon.
-   * Keys must be inserted in dictionary order or reverse dictionary order.
+   * Keys must be inserted in dictionary order.
    * *dawgdic::!DawgBuilder* is a class for building a simple dawg.
    * *dawgdic::Dawg* is a simple dawg class.
  # Dawg conversion
@@ -76,10 +78,10 @@ The construction process is given as follows:
    * *dawgdic::!DictionaryBuilder* is a class for building a dictionary.
    * *dawgdic::Dictionary* is a dictionary class.
 
-The following sample code builds a dictionary from a lexicon
-which consists of keys "apple" and "orange" without records.
+The following example builds a dictionary from a lexicon
+which consists of 2 keys "apple" and "orange" without records.
 In fact, the default value 0 is attached to the keys.
-If you want to give a record to a key other than the default value,
+If you need records for keys other than the default value,
 please pass a record to a member function *Insert()*
 of *dawgdic::!DawgBuilder* as the 2nd or 3rd argument.
 
@@ -89,13 +91,16 @@ of *dawgdic::!DawgBuilder* as the 2nd or 3rd argument.
 #include <dawgdic/dawg-builder.h>
 #include <dawgdic/dictionary-builder.h>
 
+// Inserts keys into a simple dawg.
 dawgdic::DawgBuilder dawg_builder;
 dawg_builder.Insert("apple");
 dawg_builder.Insert("orange");
 
+// Finishes building a simple dawg.
 dawgdic::Dawg dawg;
 dawg_builder.Finish(&dawg);
 
+// Builds a dictionary from a simple dawg.
 dawgdic::Dictionary dic;
 dawgdic::DictionaryBuilder::Build(dawg, &dic);
 
@@ -121,8 +126,11 @@ std::ifstream dic_file("test.dic", ios::binary);
 dawgdic::Dictionary dic;
 dic.Read(&dic_file);
 
+// Checks if a key exists or not.
 if (dic.Contains("apple"))
   std::cout << "apple: found" << std::endl;
+
+// Finds a key and gets its associated record.
 if (dic.Find("banana") < 0)
   std::cout << "banana: not found" << std::endl;
 }}}

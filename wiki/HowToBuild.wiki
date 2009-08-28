@@ -4,9 +4,9 @@
 
 The following example gives a function to build a dictionary
 from a sorted lexicon.
-This function first reads keys from an input stream and builds a dawg.
-Then, the dawg is converted to a dictionary.
-Finally, this function writes the dictionary into an output stream.
+This function first reads keys from a given input stream and builds a dawg.
+Then, this function builds a dictionary from that dawg.
+Finally, this function writes that dictionary into a given output stream.
 
 {{{
 #include <iostream>
@@ -15,33 +15,38 @@ Finally, this function writes the dictionary into an output stream.
 #include <dawgdic/dawg-builder.h>
 #include <dawgdic/dictionary-builder.h>
 
-// Builds a dictionary from a sorted lexicon in "lexicon_input"
-// and writes the dictionary into "dic_output".
+// Reads sorted keys from the given input stream "lexicon_input" and
+// builds a dictionary from the keys, and then writes the dictionary
+// into the given output stream "dic_output".
 bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
 
-  // Keys must be inserted in lexicographic order.
+  // Keys must be sorted in dictionary order.
+  // This example assumes that given keys are already sorted.
   dawgdic::DawgBuilder dawg_builder;
   std::string key;
   while (std::getline(*lexicon_input, key)) {
 
-    // "key" must be zero-terminated and 0 is passed as a record.
+    // If only one argument is passed, the function Insert() handles
+    // the given argument as a key which must be a zero-terminated
+    // character sequence. Also, the default value 0 is given as its record.
     if (!dawg_builder.Insert(key.c_str()))
       return false;
 
-    // A record could be given as the 2nd argument.
+    // Programmers can give a record as the 2nd argument.
     // if (!dawg_builder.Insert(key.c_str(), record))
     //   return false;
 
-    // A length and a record could be given as the 2nd and 3rd arguments.
+    // Programmers can give a length and a record as the 2nd and 3rd arguments.
     // if (!dawg_builder.Insert(key.c_str(), length, record))
     //   return false;
 
     // Notes:
-    //   a zero-length key is not allowed.
-    //   a record must be 0 or a positive integer.
+    //   Zero-length key is not allowed.
+    //   Records must be 0 or positive integers.
   }
 
-  // Finishes dictionary construction and initializes "dawg_builder".
+  // Finishes building dictionary. In the function Finish(), the object
+  // "dawg_builder" is automatically initialized.
   dawgdic::Dawg dawg;
   dawg_builder.Finish(&dawg);
 
@@ -50,7 +55,7 @@ bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
   if (!dawgdic::DictionaryBuilder::Build(dawg, &dic))
     return false;
 
-  // Writes a dictionary into an output stream.
+  // Writes a dictionary into a given output stream.
   return dic.Write(dic_output);
 }
 }}}

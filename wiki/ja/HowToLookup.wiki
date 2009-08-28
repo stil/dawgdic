@@ -5,11 +5,13 @@
 == 完全一致検索 ==
 
 以下の例は，辞書からキーを検索する関数である．
+NULL 文字を終端とする文字列が辞書に登録されているかどうかを確認し，
+その結果を標準出力ストリームに書き出す．
 
 {{{
 #include <dawgdic/dictionary.h>
 
-// 辞書引きをおこなう．
+// キーの有無を確認する．
 void Lookup(const dawgdic::Dictionary &dic, const char *key) {
 
   // キーが辞書に登録されているかどうかを確認する．
@@ -30,7 +32,9 @@ void Lookup(const dawgdic::Dictionary &dic, const char *key) {
 
 == 前方一致検索 ==
 
-以下の例は，文字列に含まれるキーをすべて列挙する関数である．
+以下の例は，辞書に登録されているキーを検出する関数である．
+NULL 文字を終端とする文字列を走査し，辞書に登録されているキーを検出した場合，
+それらを標準出力ストリームに書き出す．
 
 {{{
 #include <string>
@@ -51,10 +55,12 @@ void Filter(const dawgdic::Dictionary &dic, const char *text) {
         break;
 
       // 検出したキーの情報を出力する．
-      if (dic.has_value(index))
+      // 出力される内容は，キーの始点，長さ，レコード，文字列である．
+      if (dic.has_value(index)) {
         std::cout << '(' << (p - text) << ", " << (q + 1 - p) << ", "
-                  << dic.value(index) << "): "
-                  << std::string(p, q + 1 - p) << std::endl;
+                  << dic.value(index) << "): ";
+        std::cout.write(p, q + 1 - p) << std::endl;
+      }
     }
   }
 }
