@@ -19,7 +19,7 @@ a library for building and accessing double-array tries.
   * [Readme]: Please read this document first.
    * [HowToBuild]: Examples to build a dictionary from a sorted lexicon.
    * [HowToLookup]: Examples to lookup keys in a dictionary.
-   * [HowToComplete]: Examples to complete keys from a given prefix (to be written).
+   * [HowToComplete]: Examples to complete keys from a given prefix.
   * [Interface]: This document describes class interfaces.
   * [Algorithm]: This document describes algorightms (to be written).
 
