@@ -26,22 +26,26 @@ The following table shows the main classes of the library *dawgdic*.
 || *Namespace* || dawgdic ||
 
 {{{
-// Numbers of transitions and states.
+// Returns the number of allocated units.
 SizeType size() const;
+}}}
+
+In fact, each unit is associated with each transition of a dawg,
+and the number of allocated units is almost same as the number of transitions.
+
+{{{
+// Returns the number of transitions.
 SizeType num_of_transitions() const;
+// Returns the number of states.
 SizeType num_of_states() const;
 }}}
 
-These functions return the number of transitions or states in a dawg.
-
 {{{
-// Numbers of merged transitions and states.
+// Returns the number of transitions merged in dawg construction.
 SizeType num_of_merged_transitions() const;
+// Returns the number of states merged in dawg construction.
 SizeType num_of_merged_states() const;
 }}}
-
-These functions return the number of transitions or states merged
-in building a dawg.
 
 ----
 
@@ -51,22 +55,13 @@ in building a dawg.
 || *Namespace* || dawgdic ||
 
 {{{
-// Numbers of transitions and states.
+// Work same as the functions of dawgdic::Dawg.
 SizeType size() const;
 SizeType num_of_transitions() const;
 SizeType num_of_states() const;
-}}}
-
-These functions return the number of transitions or states in a dawg.
-
-{{{
-// Numbers of merged transitions and states.
 SizeType num_of_merged_transitions() const;
 SizeType num_of_merged_states() const;
 }}}
-
-These functions return the number of transitions or states merged
-in building a dawg.
 
 {{{
 // Inserts a key into a dawg.
@@ -74,18 +69,22 @@ bool Insert(const CharType *key, ValueType value = 0);
 bool Insert(const CharType *key, SizeType length, ValueType value);
 }}}
 
-This function inserts a *key* into a dawg.
-A zero-*length* *key* is not allowed to be inserted.
-Also, keys must be inserted in lexicographic order and
-a *value* must be 0 or a positive integer.
+Keys must be inserted in dictionary order.
+If the order is incorrect, these functions return false.
+Also, if the *length* of key is unspecified, the function uses
+the number of bytes until a null character instead of *length*.
+A record *value* must be 0 or a positive integer.
 
 {{{
-// Finishes building a dawg.
+// Finishes building a dawg and initializes this object.
 bool Finish(Dawg *dawg);
 }}}
 
-This function finishes building a dawg and updates *dawg*.
-Then, *this* object will be initialized.
+This function must be called after inserting all the keys.
+In this function, *this* object passes
+own managed member objects to a given *dawg*.
+Therefore, this function also initializes *this* object
+to avoid unexpected errors.
 
 ----
 
@@ -95,70 +94,57 @@ Then, *this* object will be initialized.
 || *Namespace* || dawgdic ||
 
 {{{
+// Returns the start address of the core array.
 const DictionaryUnit *units() const;
 }}}
 
-This function returns a pointer to a buffer for double-array elements.
+Actually, a dictionary is represented by just one array.
+This means that a dictionary is restored from
+the array returned by this function.
+The functions *Map()* are provided for this purpose.
 
 {{{
+// Returns the number of units in the core array.
 SizeType size() const;
-}}}
-
-This function returns the number of double-array elements.
-
-{{{
+// Returns the required number of bytes for the core array.
 SizeType total_size() const;
-}}}
-
-This function returns the number of bytes allocated to double-array elements.
-
-{{{
+// Returns the number of bytes written to a stream.
 SizeType file_size() const;
 }}}
-
-This function returns the number of bytes written by the function *Write()*.
 
 {{{
 // Reads a dictionary from an input stream.
 bool Read(std::istream *input);
-}}}
-
-This function reads a double-array from an *input* stream.
-
-{{{
-// Writes a dictionry into an output stream.
+// Writes a dictionary into an output stream.
 bool Write(std::ostream *output) const;
 }}}
 
-This function writes a double-array into an *output* stream.
-
 {{{
-// Exact matching.
+// Check whether a key exists in dictionary or not.
 bool Contains(const CharType *key) const;
 bool Contains(const CharType *key, SizeType length) const;
 }}}
 
-This function performs a dictionary lookup and
-returns whether a *key* exists in a dictionary or not.
-
 {{{
-// Exact matching.
+// Check whether a key exists in dictionary ot not, and if so,
+// return its associated record.
 ValueType Find(const CharType *key) const;
 ValueType Find(const CharType *key, SizeType length) const;
 bool Find(const CharType *key, ValueType *value) const;
 bool Find(const CharType *key, SizeType length, ValueType *value) const;
 }}}
 
-This function performs a dictionary lookup and
-returns a *value* of a *key*.
-If a *key* does not exist in a dictionary,
-this function returns -1 as a *value*.
+If a given keys does not exist in dictionary,
+these function return -1 as a record *value*.
 
 {{{
-// Prefix matching.
+// Returns the index of the initial state.
 BaseType root() const;
+// Returns whether a given state corresponds to the end of a key.
 bool has_value(BaseType index) const;
+// Returns a record associated with a given state.
 ValueType value(BaseType index) const;
+// Follows transitions and modifies a given index.
 bool Follow(CharType label, BaseType *index) const;
 bool Follow(const CharType *s, BaseType *index);
 bool Follow(const CharType *s, BaseType *index, SizeType *count);
@@ -167,27 +153,22 @@ bool Follow(const CharType *s, SizeType length, BaseType *index, SizeType *count
 }}}
 
 These functions are provided for prefix matching.
-First, an index must be initialized by using *root()*.
+First, an index must be initialized by using the function *root()*.
 Then, the functions *Follow()* follow transitions with a given *label* or
 labels in a given string *s*.
-A function *has_value()* returns whether a current state
-has an out-transition to a terminal or not.
-Also, a function *value()* returns a value in a corresponding terminal.
+After that, the function *has_value()* returns whether
+the current state corresponds to the end of a key.
+And if the function *has_value()* returns true,
+the function *value()* returns a record associated with that key.
 
 {{{
-// Maps memory with its size.
+// Uses arbitrary memory space as the core array.
 void Map(const void *address);
-}}}
-
-This function maps a given *address* to a buffer of double-array elements.
-The first 4 bytes are used as the buffer size.
-
-{{{
-// Maps memory with its size.
 void Map(const void *address, SizeType size);
 }}}
 
-This function maps a given *address* to a buffer of double-array elements.
+If the 2nd argument *size* is omitted,
+the first 4 bytes of given space are used as the buffer size.
 
 ----
 
@@ -201,8 +182,10 @@ This function maps a given *address* to a buffer of double-array elements.
 static bool Build(const Dawg &dawg, Dictionary *dic, BaseType *num_of_unused_units = NULL);
 }}}
 
-This function builds a dictionary from a *dawg*,
-and then updates *dic* and *num_of_unused_units*.
+This function builds a dictionary from a *dawg* and updates *dic*.
+If the 3rd argument *num_of_unused_units* is not NULL,
+this function assigns the number of empty elements in the double-array
+to this argument *num_of_unused_units*.
 
 ----
 
@@ -214,16 +197,9 @@ and then updates *dic* and *num_of_unused_units*.
 {{{
 // Reads a completion dictionary from an input stream.
 bool Read(std::istream *input);
-}}}
-
-This function reads a completion dictionary from an *input* stream.
-
-{{{
 // Writes a dictionry into an output stream.
 bool Write(std::ostream *output) const;
 }}}
-
-This function writes a completion dictionary into an *output* stream.
 
 ----
 
@@ -250,58 +226,47 @@ a pair of *dawg* and *dic*, and then updates *guide*.
 {{{
 // Initializes an object.
 Completer();
+// Initializes an object and sets required dictionaries.
 Completer(const Dictionary &dic, const Guide &guide);
 }}}
 
-Initializes an object for completing keys from a given prefix.
-The completion process requires a base dictionary *dic* and
-its corresponding completion dictionary *guide*.
-
 {{{
-// Sets a base dictionary or a completion dictionary.
+// Sets a base dictionary.
 void set_dic(const Dictionary &dic);
+// Sets a completion dictionary.
 void set_guide(const Guide &guide);
 }}}
 
-These functions sets a base dictionary and
-its corresponding completion dictionary.
-
 {{{
-// Gets a reference to a base dictionary or a completion dictionary.
+// Gets a reference to base dictionary.
 const Dictionary &dic() const;
+// Gets a reference to completion dictionary.
 const Guide &guide() const;
 }}}
 
-These functions return references to
-a base dictionary and a completion dictionary.
-
 {{{
-// Begins key completion.
+// Prepares for key completion.
 void Start(BaseType index, const char *prefix = "");
 void Start(BaseType index, const char *prefix, SizeType length);
 }}}
 
-Prepares for completing keys from a given *index*.
-The other argument *prefix* is just returned as
-the prefix of completed keys.
+These functions prepare for completing keys from
+the given start position *index*.
+The 2nd argument *prefix* does not affect the start position,
+and it is just attached to completed keys as the shared prefix.
+By passing the sequence of character from the root to the start position,
+The following function *Next()* builds perfect keys.
 
 {{{
-// Gets the next completion result.
+// Completes the next key.
 bool Next();
-}}}
-
-This function incrementally gets completion results.
-
-{{{
-// Gets information of a completed key.
+// Returns the completed key as a zero terminated string.
 const char *key() const;
+// Returns the length of the completed key.
 SizeType length() const;
+// Returns the record associated with the completed key.
 ValueType value() const;
 }}}
-
-The function *key()* returns a pointer to a completed key (zero terminated),
-and the function *length()* returns the key length.
-Also, the function *value()* return the key record.
 
 ----
 

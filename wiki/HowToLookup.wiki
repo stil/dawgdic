@@ -1,4 +1,4 @@
-#summary An example to lookup keys in a dictionary.
+#summary Examples to lookup keys in a dictionary.
 
 = How to Lookup =
 

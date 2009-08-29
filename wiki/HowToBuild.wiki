@@ -1,6 +1,8 @@
-#summary An example to build a dictionary from a sorted lexicon.
+#summary Examples to build a dictionary from a sorted lexicon.
 
 = How to Build =
+
+== Dictionary Construction ==
 
 The following example gives a function to build a dictionary
 from a sorted lexicon.
@@ -55,7 +57,7 @@ bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
   if (!dawgdic::DictionaryBuilder::Build(dawg, &dic))
     return false;
 
-  // Writes a dictionary into a given output stream.
+  // Writes the dictionary into the given output stream.
   return dic.Write(dic_output);
 }
 }}}

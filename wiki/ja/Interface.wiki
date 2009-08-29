@@ -233,14 +233,16 @@ Completer(const Dictionary &dic, const Guide &guide);
 }}}
 
 {{{
-// 基本辞書およびキー補完用の辞書を設定する．
+// 基本辞書を設定する．
 void set_dic(const Dictionary &dic);
+// キー補完用の辞書を設定する．
 void set_guide(const Guide &guide);
 }}}
 
 {{{
-// 基本辞書およびキー補完用の辞書を取得する．
+// 基本辞書への参照を取得する．
 const Dictionary &dic() const;
+// キー補完用の辞書への参照を取得する．
 const Guide &guide() const;
 }}}
 
