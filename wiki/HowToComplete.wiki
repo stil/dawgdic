@@ -72,7 +72,7 @@ void Complete(const dawgdic::Dictionary &dic, const dawgdic::Guide &guide,
 
     // Completes the next key.
     // Finishes the function if there are no more keys.
-    if (completer.Next())
+    if (!completer.Next())
       break;
 
     // Shows a completed key and its associated record.
