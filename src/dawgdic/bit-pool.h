@@ -30,7 +30,11 @@ public:
 	}
 
 	// Deletes all bits and frees memory.
-	void Clear() { pool_.Clear(); }
+	void Clear()
+	{
+		pool_.Clear();
+		size_ = 0;
+	}
 
 	// Swaps bit pools.
 	void Swap(BitPool *bit_pool) { pool_.Swap(&bit_pool->pool_); }

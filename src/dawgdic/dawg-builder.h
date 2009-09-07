@@ -46,6 +46,7 @@ public:
 	{
 		base_pool_.Clear();
 		label_pool_.Clear();
+		flag_pool_.Clear();
 		unit_pool_.Clear();
 
 		std::vector<BaseType>(0).swap(hash_table_);
