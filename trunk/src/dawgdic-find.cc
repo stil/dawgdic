@@ -77,7 +77,7 @@ public:
 			"Options:\n"
 			"  -h  display this help and exit\n"
 			"  -g  load dictionary with guide\n"
-			"  -g  load dictionary with ranked guide\n";
+			"  -r  load dictionary with ranked guide\n";
 		*output << std::endl;
 	}
 

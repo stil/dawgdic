@@ -7,6 +7,7 @@
 #include "ranked-guide-link.h"
 
 #include <algorithm>
+#include <functional>
 #include <vector>
 
 namespace dawgdic {
@@ -18,8 +19,16 @@ public:
 	static bool Build(const Dawg &dawg, const Dictionary &dic,
 		RankedGuide *guide)
 	{
+		return Build(dawg, dic, guide, std::less<ValueType>());
+	}
+
+	// Builds a dictionary for completing keys.
+	template <typename VALUE_COMPARER_TYPE>
+	static bool Build(const Dawg &dawg, const Dictionary &dic,
+		RankedGuide *guide, VALUE_COMPARER_TYPE value_comparer)
+	{
 		RankedGuideBuilder builder(dawg, dic, guide);
-		return builder.BuildRankedGuide();
+		return builder.BuildRankedGuide(value_comparer);
 	}
 
 private:
@@ -39,7 +48,8 @@ private:
 		RankedGuide *guide) : dawg_(dawg), dic_(dic), guide_(guide),
 		units_(), links_(), is_fixed_table_() {}
 
-	bool BuildRankedGuide()
+	template <typename VALUE_COMPARER_TYPE>
+	bool BuildRankedGuide(VALUE_COMPARER_TYPE value_comparer)
 	{
 		// Initializes units and flags.
 		units_.resize(dic_.size());
@@ -49,7 +59,8 @@ private:
 			return true;
 
 		ValueType max_value = -1;
-		if (!BuildRankedGuide(dawg_.root(), dic_.root(), &max_value))
+		if (!BuildRankedGuide(dawg_.root(), dic_.root(),
+			&max_value, value_comparer))
 			return false;
 
 		guide_->SwapUnitsBuf(&units_);
@@ -57,8 +68,9 @@ private:
 	}
 
 	// Builds a guide recursively.
+	template <typename VALUE_COMPARER_TYPE>
 	bool BuildRankedGuide(BaseType dawg_index, BaseType dic_index,
-		ValueType *max_value)
+		ValueType *max_value, VALUE_COMPARER_TYPE value_comparer)
 	{
 		if (is_fixed(dic_index))
 			return FindMaxValue(dic_index, max_value);
@@ -67,11 +79,11 @@ private:
 		SizeType initial_num_links = links_.size();
 
 		// Enumerates links to the next states.
-		if (!EnumerateLinks(dawg_index, dic_index))
+		if (!EnumerateLinks(dawg_index, dic_index, value_comparer))
 			return false;
 
-		std::stable_sort(links_.begin() + initial_num_links,
-			links_.end(), RankedGuideLink::Comparer());
+		std::stable_sort(links_.begin() + initial_num_links, links_.end(),
+			RankedGuideLink::MakeComparer(value_comparer));
 
 		// Reflects links into units.
 		if (!TurnLinksToUnits(dic_index, initial_num_links))
@@ -99,7 +111,9 @@ private:
 	}
 
 	// Enumerates links to the next states.
-	bool EnumerateLinks(BaseType dawg_index, BaseType dic_index)
+	template <typename VALUE_COMPARER_TYPE>
+	bool EnumerateLinks(BaseType dawg_index, BaseType dic_index,
+		VALUE_COMPARER_TYPE value_comparer)
 	{
 		for (BaseType dawg_child_index = dawg_.child(dawg_index);
 			dawg_child_index != 0;
@@ -120,7 +134,7 @@ private:
 					return false;
 
 				if (!BuildRankedGuide(dawg_child_index, dic_child_index,
-					&value))
+					&value, value_comparer))
 					return false;
 			}
 			links_.push_back(RankedGuideLink(child_label, value));
