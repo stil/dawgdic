@@ -7,20 +7,28 @@
 #include "ranked-guide.h"
 
 #include <algorithm>
+#include <functional>
 #include <queue>
 #include <vector>
 
 namespace dawgdic {
 
-class RankedCompleter
+template <typename VALUE_COMPARER_TYPE = std::less<ValueType> >
+class RankedCompleterBase
 {
 public:
-	RankedCompleter()
+	typedef VALUE_COMPARER_TYPE ValueComparerType;
+
+	explicit RankedCompleterBase(
+		ValueComparerType value_comparer = ValueComparerType())
 		: dic_(NULL), guide_(NULL), key_(), prefix_length_(0), value_(-1),
-		nodes_(), node_queue_(), candidate_queue_() {}
-	RankedCompleter(const Dictionary &dic, const RankedGuide &guide)
+		nodes_(), node_queue_(), candidate_queue_(
+			RankedCompleterCandidate::MakeComparer(value_comparer)) {}
+	RankedCompleterBase(const Dictionary &dic, const RankedGuide &guide,
+		ValueComparerType value_comparer = ValueComparerType())
 		: dic_(&dic), guide_(&guide), key_(), prefix_length_(0), value_(-1),
-		nodes_(), node_queue_(), candidate_queue_() {}
+		nodes_(), node_queue_(), candidate_queue_(
+			RankedCompleterCandidate::MakeComparer(value_comparer)) {}
 
 	void set_dic(const Dictionary &dic) { dic_ = &dic; }
 	void set_guide(const RankedGuide &guide) { guide_ = &guide; }
@@ -113,11 +121,12 @@ private:
 	std::vector<BaseType> node_queue_;
 	std::priority_queue<RankedCompleterCandidate,
 		std::vector<RankedCompleterCandidate>,
-		RankedCompleterCandidate::Comparer> candidate_queue_;
+		RankedCompleterCandidate::Comparer<ValueComparerType> >
+			candidate_queue_;
 
 	// Disallows copies.
-	RankedCompleter(const RankedCompleter &);
-	RankedCompleter &operator=(const RankedCompleter &);
+	RankedCompleterBase(const RankedCompleterBase &);
+	RankedCompleterBase &operator=(const RankedCompleterBase &);
 
 	// Pushes a node to queue.
 	void EnqueueNode(BaseType node_index)
@@ -199,6 +208,8 @@ private:
 		return static_cast<BaseType>(nodes_.size() - 1);
 	}
 };
+
+typedef RankedCompleterBase<> RankedCompleter;
 
 }  // namespace dawgdic
 
