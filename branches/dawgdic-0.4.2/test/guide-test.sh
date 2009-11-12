@@ -16,28 +16,25 @@ then
 fi
 
 ## Builds a dictionary from a lexicon.
-$build_bin -rt lexicon lexicon.dic
+$build_bin -gt lexicon lexicon.dic
 if [ $? -ne 0 ]
 then
 	exit 1
 fi
 
 ## Finds prefix keys from a lexicon.
-$find_bin -r lexicon.dic < query > ranked-result
+$find_bin -g lexicon.dic < query > guide-result
 if [ $? -ne 0 ]
 then
 	exit 1
 fi
 
 ## Checks the result.
-cmp ranked-result ranked-answer
+cmp guide-result guide-answer
 if [ $? -ne 0 ]
 then
 	exit 1
 fi
 
 ## Removes temporary files.
-rm -f lexicon.dic ranked-result
-
-## Tests the ranked completer for random keys and values.
-./ranked-completer-test
+rm -f lexicon.dic guide-result
