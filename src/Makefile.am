@@ -1,4 +1,4 @@
-AM_CXXFLAGS = -Wall -Weffc++
+AM_CXXFLAGS = -Wall -I./
 
 bin_PROGRAMS = dawgdic-build dawgdic-find
 

@@ -1,6 +1,6 @@
-#include "dawgdic/completer.h"
-#include "dawgdic/dictionary.h"
-#include "dawgdic/ranked-completer.h"
+#include <dawgdic/completer.h>
+#include <dawgdic/dictionary.h>
+#include <dawgdic/ranked-completer.h>
 
 #include <fstream>
 #include <iostream>

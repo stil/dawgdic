@@ -38,3 +38,6 @@ fi
 
 ## Removes temporary files.
 rm -f lexicon.dic ranked-result
+
+## Tests the ranked completer for random keys and values.
+./ranked-completer-test

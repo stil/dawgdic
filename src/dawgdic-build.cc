@@ -1,7 +1,7 @@
-#include "dawgdic/dawg-builder.h"
-#include "dawgdic/dictionary-builder.h"
-#include "dawgdic/guide-builder.h"
-#include "dawgdic/ranked-guide-builder.h"
+#include <dawgdic/dawg-builder.h>
+#include <dawgdic/dictionary-builder.h>
+#include <dawgdic/guide-builder.h>
+#include <dawgdic/ranked-guide-builder.h>
 
 #include <cstdlib>
 #include <fstream>
