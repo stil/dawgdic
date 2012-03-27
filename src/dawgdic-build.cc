@@ -82,7 +82,7 @@ public:
 			"\n"
 			"Options:\n"
 			"  -h  display this help and exit\n"
-			"  -t  handle tab as separater\n"
+			"  -t  handle tab as separator\n"
 			"  -g  build dictionary with guide\n"
 			"  -r  build dictionary with ranked guide\n";
 		*output << std::endl;
