@@ -1,7 +1,8 @@
 #! /bin/sh
 
-build_bin="../src/dawgdic-build"
-find_bin="../src/dawgdic-find"
+build_bin="${TOP_BUILDDIR:-..}/src/dawgdic-build"
+find_bin="${TOP_BUILDDIR:-..}/src/dawgdic-find"
+test_dir="${TOP_SRCDIR:-..}/test"
 
 if [ ! -f "$build_bin" ]
 then
@@ -16,21 +17,21 @@ then
 fi
 
 ## Builds a dictionary from a lexicon.
-$build_bin -gt lexicon lexicon.dic
+$build_bin -gt "${test_dir}/lexicon" lexicon.dic
 if [ $? -ne 0 ]
 then
   exit 1
 fi
 
 ## Finds prefix keys from a lexicon.
-$find_bin -g lexicon.dic < query > guide-result
+$find_bin -g lexicon.dic < "${test_dir}/query" > guide-result
 if [ $? -ne 0 ]
 then
   exit 1
 fi
 
 ## Checks the result.
-cmp guide-result guide-answer
+cmp guide-result "${test_dir}/guide-answer"
 if [ $? -ne 0 ]
 then
   exit 1
