@@ -155,19 +155,23 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CXXFLAGS = -Wall -I../src/
+AM_CXXFLAGS = -Wall -I$(top_srcdir)/src/
 TESTS = \
-	dic-test.sh \
-	guide-test.sh \
-	ranked-test.sh
+  dic-test.sh \
+  guide-test.sh \
+  ranked-test.sh
+
+TESTS_ENVIRONMENT = \
+  TOP_SRCDIR="$(top_srcdir)" \
+  TOP_BUILDDIR="$(top_builddir)"
 
 ranked_completer_test_SOURCES = ranked-completer-test.cc
 dist_noinst_DATA = $(TESTS) \
-	lexicon \
-	query \
-	dic-answer \
-	guide-answer \
-	ranked-answer
+  lexicon \
+  query \
+  dic-answer \
+  guide-answer \
+  ranked-answer
 
 all: all-am
 
