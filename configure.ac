@@ -1,8 +1,8 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ(2.61)
-AC_INIT(dawgdic, 0.4.2, syata@acm.org)
+AC_PREREQ([2.68])
+AC_INIT([dawgdic], [0.4.3], [syata@acm.org])
 AC_CONFIG_SRCDIR([src/dawgdic-build.cc])
 AM_INIT_AUTOMAKE
 
@@ -16,11 +16,11 @@ AC_PROG_INSTALL
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
-AC_C_CONST
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
-AC_HEADER_STDC
 
-AC_CONFIG_FILES([Makefile src/Makefile test/Makefile])
+AC_CONFIG_FILES([Makefile
+                 src/Makefile
+                 test/Makefile])
 AC_OUTPUT
