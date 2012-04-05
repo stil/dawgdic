@@ -1,0 +1,14 @@
+a: a = 1 an = 0 and = 2 appear = 1 apple = 1
+an: an = 0 and = 2
+and: and = 2
+appear: appear = 1
+apple: apple = 1
+bin: bin = 2 binary = 1 bind = 0 binder = 2 binding = 1
+binary: binary = 1
+bind: bind = 0 binder = 2 binding = 1
+binder: binder = 2
+binding: binding = 1
+blind: blind = 0
+can: can = 0 cancer = 1
+cancer: cancer = 1
+cat: cat = 2
