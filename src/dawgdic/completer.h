@@ -78,8 +78,10 @@ class Completer {
           UCharType sibling_label = guide_->sibling(index);
 
           // Moves to the previous node.
-          key_.resize(key_.size() - 1);
-          key_.back() = '\0';
+          if (key_.size() > 1) {
+            key_.resize(key_.size() - 1);
+            key_.back() = '\0';
+          }
           index_stack_.resize(index_stack_.size() - 1);
           if (index_stack_.empty()) {
             return false;
