@@ -41,6 +41,7 @@ bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
 
     // 注意：
     //   長さ 0 のキーは追加できない．
+    //   NULL 文字を含むキーは追加できない．
     //   レコードは 0 以上の整数でなければならない．
   }
 

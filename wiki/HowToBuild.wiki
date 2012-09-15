@@ -44,6 +44,7 @@ bool BuildDictionary(std::istream *lexicon_input, std::ostream *dic_output) {
 
     // Notes:
     //   Zero-length key is not allowed.
+    //   Binary key, including a null character, is not allowed.
     //   Records must be 0 or positive integers.
   }
 
