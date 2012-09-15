@@ -83,6 +83,11 @@ class DawgBuilder {
     if (key == NULL || length <= 0 || value < 0) {
       return false;
     }
+    for (SizeType i = 0; i < length; ++i) {
+      if (key[i] == '\0') {
+        return false;
+      }
+    }
     return InsertKey(key, length, value);
   }
 
