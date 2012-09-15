@@ -71,7 +71,9 @@ bool Insert(const CharType *key, SizeType length, ValueType value);
 
 Keys must be inserted in dictionary order.
 If the order is incorrect, these functions return false.
-Also, if the *length* of key is unspecified, the function uses
+Also, if the *length* of key is specified and the key contains
+a null character, these functions return false.
+On the other hand, if *length* is unspecified, the function uses
 the number of bytes until a null character instead of *length*.
 A record *value* must be 0 or a positive integer.
 

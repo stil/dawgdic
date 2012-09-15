@@ -71,7 +71,9 @@ bool Insert(const CharType *key, SizeType length, ValueType value);
 
 キーは辞書順に登録する必要があり，
 不正な順序でキーを登録しようとした場合は false を返す．
-また，キーの長さ *length* が指定されていない場合，
+また，キーの長さ *length* が指定されているとき，
+キーに NULL 文字が含まれていれば false を返す．
+一方， *length* が指定されていない場合，
 NULL 文字が出現するまでをキーの長さとして使用する．
 レコード *value* は 0 以上 INT_MAX 以下の整数のみを受け付ける．
 
