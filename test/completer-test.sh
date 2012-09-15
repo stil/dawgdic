@@ -17,25 +17,25 @@ then
 fi
 
 ## Builds a dictionary from a lexicon.
-$build_bin -t "${test_dir}/lexicon" lexicon.dic
+$build_bin -gt "${test_dir}/lexicon" lexicon.dic
 if [ $? -ne 0 ]
 then
   exit 1
 fi
 
 ## Finds prefix keys from a lexicon.
-$find_bin lexicon.dic < "${test_dir}/query" > dic-result
+$find_bin -g lexicon.dic < "${test_dir}/query" > completer-result
 if [ $? -ne 0 ]
 then
   exit 1
 fi
 
 ## Checks the result.
-cmp dic-result "${test_dir}/dic-answer"
+cmp completer-result "${test_dir}/completer-answer"
 if [ $? -ne 0 ]
 then
   exit 1
 fi
 
 ## Removes temporary files.
-rm -f lexicon.dic dic-result
+rm -f lexicon.dic completer-result
