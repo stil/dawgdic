@@ -24,21 +24,21 @@ then
 fi
 
 ## Finds prefix keys from a lexicon.
-$find_bin -r lexicon.dic < "${test_dir}/query" > ranked-result
+$find_bin -r lexicon.dic < "${test_dir}/query" > ranked-completer-result
 if [ $? -ne 0 ]
 then
   exit 1
 fi
 
 ## Checks the result.
-cmp ranked-result "${test_dir}/ranked-answer"
+cmp ranked-completer-result "${test_dir}/ranked-completer-answer"
 if [ $? -ne 0 ]
 then
   exit 1
 fi
 
 ## Removes temporary files.
-rm -f lexicon.dic ranked-result
+rm -f lexicon.dic ranked-completer-result
 
 ## Tests the ranked completer for random keys and values.
 ./ranked-completer-test

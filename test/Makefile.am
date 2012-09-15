@@ -1,9 +1,9 @@
 AM_CXXFLAGS = -Wall -I$(top_srcdir)/src/
 
 TESTS = \
-  dic-test.sh \
-  guide-test.sh \
-  ranked-test.sh
+  dictionary-test.sh \
+  completer-test.sh \
+  ranked-completer-test.sh
 
 TESTS_ENVIRONMENT = \
   TOP_SRCDIR="$(top_srcdir)" \
@@ -17,6 +17,6 @@ ranked_completer_test_SOURCES = ranked-completer-test.cc
 dist_noinst_DATA = $(TESTS) \
   lexicon \
   query \
-  dic-answer \
-  guide-answer \
-  ranked-answer
+  dictionary-answer \
+  completer-answer \
+  ranked-completer-answer
