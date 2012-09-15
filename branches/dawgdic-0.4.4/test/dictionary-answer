@@ -1,0 +1,14 @@
+a: a = 1;
+an: a = 1; an = 0;
+and: a = 1; an = 0; and = 2;
+appear: a = 1; appear = 1;
+apple: a = 1; apple = 1;
+bin: bin = 2;
+binary: bin = 2; binary = 1;
+bind: bin = 2; bind = 0;
+binder: bin = 2; bind = 0; binder = 2;
+binding: bin = 2; bind = 0; binding = 1;
+blind: blind = 0;
+can: can = 0;
+cancer: can = 0; cancer = 1;
+cat: cat = 2;
