@@ -33,7 +33,10 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-noinst_PROGRAMS = ranked-completer-test$(EXEEXT)
+TESTS = dawg-builder-test$(EXEEXT) dictionary-test.sh \
+	completer-test.sh ranked-completer-test.sh
+noinst_PROGRAMS = dawg-builder-test$(EXEEXT) \
+	ranked-completer-test$(EXEEXT)
 subdir = test
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -45,6 +48,9 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
+am_dawg_builder_test_OBJECTS = dawg-builder-test.$(OBJEXT)
+dawg_builder_test_OBJECTS = $(am_dawg_builder_test_OBJECTS)
+dawg_builder_test_LDADD = $(LDADD)
 am_ranked_completer_test_OBJECTS = ranked-completer-test.$(OBJEXT)
 ranked_completer_test_OBJECTS = $(am_ranked_completer_test_OBJECTS)
 ranked_completer_test_LDADD = $(LDADD)
@@ -57,8 +63,10 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(ranked_completer_test_SOURCES)
-DIST_SOURCES = $(ranked_completer_test_SOURCES)
+SOURCES = $(dawg_builder_test_SOURCES) \
+	$(ranked_completer_test_SOURCES)
+DIST_SOURCES = $(dawg_builder_test_SOURCES) \
+	$(ranked_completer_test_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -156,15 +164,11 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CXXFLAGS = -Wall -I$(top_srcdir)/src/
-TESTS = \
-  dictionary-test.sh \
-  completer-test.sh \
-  ranked-completer-test.sh
-
 TESTS_ENVIRONMENT = \
   TOP_SRCDIR="$(top_srcdir)" \
   TOP_BUILDDIR="$(top_builddir)"
 
+dawg_builder_test_SOURCES = dawg-builder-test.cc
 ranked_completer_test_SOURCES = ranked-completer-test.cc
 dist_noinst_DATA = $(TESTS) \
   lexicon \
@@ -210,6 +214,9 @@ $(am__aclocal_m4_deps):
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+dawg-builder-test$(EXEEXT): $(dawg_builder_test_OBJECTS) $(dawg_builder_test_DEPENDENCIES) $(EXTRA_dawg_builder_test_DEPENDENCIES) 
+	@rm -f dawg-builder-test$(EXEEXT)
+	$(CXXLINK) $(dawg_builder_test_OBJECTS) $(dawg_builder_test_LDADD) $(LIBS)
 ranked-completer-test$(EXEEXT): $(ranked_completer_test_OBJECTS) $(ranked_completer_test_DEPENDENCIES) $(EXTRA_ranked_completer_test_DEPENDENCIES) 
 	@rm -f ranked-completer-test$(EXEEXT)
 	$(CXXLINK) $(ranked_completer_test_OBJECTS) $(ranked_completer_test_LDADD) $(LIBS)
@@ -220,6 +227,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dawg-builder-test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ranked-completer-test.Po@am__quote@
 
 .cc.o:
