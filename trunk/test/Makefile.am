@@ -1,7 +1,7 @@
 AM_CXXFLAGS = -Wall -I$(top_srcdir)/src/
 
 TESTS = \
-  dawg-builder-test \
+  dawg-builder-test.sh \
   dictionary-test.sh \
   completer-test.sh \
   ranked-completer-test.sh
